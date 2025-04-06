@@ -1,0 +1,11 @@
+{
+  "files": {
+    "main.css": "/voltaris-website/static/css/main.aa2c8dbf.css",
+    "main.js": "/voltaris-website/static/js/main.6cbf8c0b.js",
+    "index.html": "/voltaris-website/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.aa2c8dbf.css",
+    "static/js/main.6cbf8c0b.js"
+  ]
+}
