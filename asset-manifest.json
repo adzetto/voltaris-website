@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.65125f3d.css": "/voltaris-website/static/css/main.65125f3d.b0aa347d.css",
-    "main.65125f3d.js": "/voltaris-website/static/js/main.65125f3d.5db756d3.js",
+    "main.65125f3d.css": "/voltaris-website/static/css/main.65125f3d.bb5bec00.css",
+    "main.65125f3d.js": "/voltaris-website/static/js/main.65125f3d.61208045.js",
     "vendor.threejs.19c8c233.js": "/voltaris-website/static/js/vendor.threejs.19c8c233.0c882735.js",
     "vendor.three-stdlib.js": "/voltaris-website/static/js/vendor.three-stdlib.74006f8d.js",
     "vendor.react-dom.js": "/voltaris-website/static/js/vendor.react-dom.1392c4e5.js",
@@ -9,9 +9,9 @@
     "vendor.monogrid.js": "/voltaris-website/static/js/vendor.monogrid.47e5d2dd.js",
     "vendor.katex.bf30465a.js": "/voltaris-website/static/js/vendor.katex.bf30465a.95b80bed.js",
     "vendor.unknown.css": "/voltaris-website/static/css/vendor.unknown.3fe0eceb.css",
-    "static/js/215.afd48723.js": "/voltaris-website/static/js/215.afd48723.js",
+    "static/js/845.59442e4f.js": "/voltaris-website/static/js/845.59442e4f.js",
     "main.a6eb99f0.js": "/voltaris-website/static/js/main.a6eb99f0.6c740483.js",
-    "main.eec7c0f2.js": "/voltaris-website/static/js/main.eec7c0f2.4992e113.js",
+    "main.eec7c0f2.js": "/voltaris-website/static/js/main.eec7c0f2.92b6e66a.js",
     "vendor.threejs.169dba7f.js": "/voltaris-website/static/js/vendor.threejs.169dba7f.99676da9.js",
     "vendor.threejs.68c5480d.js": "/voltaris-website/static/js/vendor.threejs.68c5480d.2763ecf1.js",
     "vendor.threejs.8e12fa16.js": "/voltaris-website/static/js/vendor.threejs.8e12fa16.f6bfb999.js",
@@ -92,10 +92,10 @@
     "static/js/vendor.katex.337d9f25.35a069e5.js",
     "static/js/vendor.katex.bf30465a.95b80bed.js",
     "static/css/vendor.unknown.3fe0eceb.css",
-    "static/js/215.afd48723.js",
+    "static/js/845.59442e4f.js",
     "static/js/main.a6eb99f0.6c740483.js",
-    "static/js/main.eec7c0f2.4992e113.js",
-    "static/css/main.65125f3d.b0aa347d.css",
-    "static/js/main.65125f3d.5db756d3.js"
+    "static/js/main.eec7c0f2.92b6e66a.js",
+    "static/css/main.65125f3d.bb5bec00.css",
+    "static/js/main.65125f3d.61208045.js"
   ]
 }
