@@ -34,12 +34,17 @@ const CAR_COLORS = {
   GREEN: new THREE.Color('#01644a')       // Racing green
 };
 
-// Loading indicator component
-const LoadingIndicator = () => (
+// Loading indicator component with progress
+const LoadingIndicator = ({ progress = 0 }) => (
   <Html center>
-    <div className="flex flex-col items-center justify-center bg-black/80 backdrop-blur-md p-5 rounded-lg border border-gray-800">
-      <div className="w-12 h-12 border-2 border-t-red-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin mb-3"></div>
-      <div className="text-white text-sm font-medium">Yükleniyor...</div>
+    <div className="flex flex-col items-center justify-center bg-black/80 backdrop-blur-md p-6 rounded-lg border border-gray-800">
+      <div className="w-16 h-16 border-3 border-t-red-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin mb-4"></div>
+      <div className="text-white text-base font-medium mb-3">Yükleniyor... {progress ? `${Math.floor(progress)}%` : ''}</div>
+      {progress > 0 && (
+        <div className="w-48 h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-red-600 to-blue-600" style={{ width: `${progress}%` }}></div>
+        </div>
+      )}
     </div>
   </Html>
 );
@@ -125,6 +130,7 @@ function OptimizedCarModel() {
   const groupRef = useRef();
   const [model, setModel] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
   const [hovered, setHovered] = useState(false);
   
   // Define our primary car color - Bright red is default
@@ -140,6 +146,9 @@ function OptimizedCarModel() {
           modelPath,
           (progress) => {
             console.log(`Loading model: ${progress.toFixed(1)}%`);
+            if (isMounted) {
+              setLoadProgress(progress);
+            }
           }
         );
         
@@ -258,9 +267,14 @@ function OptimizedCarModel() {
             }
           });
           
-          setModel(optimizedModel);
-          setIsLoading(false);
-          console.log("Model loaded successfully with enhanced materials");
+          // Small delay to ensure materials are properly applied before hiding the loader
+          setTimeout(() => {
+            if (isMounted) {
+              setModel(optimizedModel);
+              setIsLoading(false);
+              console.log("Model loaded successfully with enhanced materials");
+            }
+          }, 500);
         }
       } catch (error) {
         console.error('Failed to load model:', error);
@@ -294,7 +308,7 @@ function OptimizedCarModel() {
   });
 
   if (isLoading) {
-    return null;
+    return <LoadingIndicator progress={loadProgress} />;
   }
 
   return (
