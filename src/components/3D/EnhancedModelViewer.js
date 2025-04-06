@@ -68,7 +68,7 @@ function EnhancedLighting() {
 // Model component with optimized loading and rendering
 function OptimizedCarModel() {
   // Fix the model path to use the proper location with process.env.PUBLIC_URL
-  const modelPath = process.env.PUBLIC_URL + '/models/model_3d.gltf';
+  const modelPath = process.env.PUBLIC_URL + '/models/model_3d.draco.gltf';
   const groupRef = useRef();
   const [model, setModel] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

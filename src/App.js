@@ -222,7 +222,7 @@ const CarModel = () => {
     if (!currentGroup) return;
     
     // Create a path to our 3D model, using the correct public URL path
-    const modelPath = `${process.env.PUBLIC_URL}/3D/model_3d/Part2_v4_ass-1.bin`;
+    const modelPath = `${process.env.PUBLIC_URL}/3D/model_3d/model_3d.draco.gltf`;
     
     // Set up DRACO decoder - use the generic CDN for broader compatibility
     const dracoLoader = new DRACOLoader();
