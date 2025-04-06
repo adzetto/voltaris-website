@@ -30,7 +30,10 @@ THREE.Cache.enabled = true;
 
 // Set default pixel ratio for better performance
 if (window.devicePixelRatio > 2) {
-  THREE.setPixelRatio(2); // Cap at 2x for better performance
+  // Create a temporary renderer to set pixel ratio
+  const tempRenderer = new THREE.WebGLRenderer();
+  tempRenderer.setPixelRatio(2); // Cap at 2x for better performance
+  tempRenderer.dispose();
 }
 
 // ADAS Components Implementation

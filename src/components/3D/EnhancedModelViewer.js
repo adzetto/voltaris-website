@@ -74,6 +74,9 @@ function OptimizedCarModel() {
   const [isLoading, setIsLoading] = useState(true);
   const [hovered, setHovered] = useState(false);
   
+  // Apply BVH for better raycasting performance
+  const bvh = useBVH();
+  
   // Load the model using our optimized loader
   useEffect(() => {
     let isMounted = true;
@@ -88,10 +91,10 @@ function OptimizedCarModel() {
           }
         );
         
-        // Apply BVH for better raycasting performance
+        // Apply BVH to meshes
         optimizedModel.traverse((child) => {
           if (child.isMesh && child.geometry) {
-            useBVH(child);
+            bvh.current = child;
           }
         });
         
@@ -113,7 +116,7 @@ function OptimizedCarModel() {
     return () => {
       isMounted = false;
     };
-  }, [modelPath]);
+  }, [modelPath, bvh]);
   
   // Handle hover state
   const handlePointerOver = () => setHovered(true);
