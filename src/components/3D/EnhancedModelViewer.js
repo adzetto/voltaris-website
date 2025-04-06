@@ -1,5 +1,5 @@
 import React, { Suspense, useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { 
   OrbitControls, 
   Environment, 
@@ -8,13 +8,27 @@ import {
   PerspectiveCamera,
   Float,
   SpotLight,
-  Preload
+  Preload,
+  useTexture,
+  Html,
+  useBVH
 } from '@react-three/drei';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { loadOptimizedModel, createLODModel } from '../../utils/ModelOptimizer';
 
+// Loading indicator component
+const LoadingIndicator = () => (
+  <Html center>
+    <div className="flex flex-col items-center justify-center">
+      <div className="w-16 h-16 border-4 border-t-blue-500 border-r-transparent border-b-red-500 border-l-transparent rounded-full animate-spin"></div>
+      <p className="mt-4 text-white text-sm">Loading model...</p>
+    </div>
+  </Html>
+);
 
-
-// Enhanced lighting with spotlight
+// Enhanced lighting with optimized settings
 function EnhancedLighting() {
   return (
     <>
@@ -29,14 +43,19 @@ function EnhancedLighting() {
         attenuation={5}
         anglePower={4}
         color="#ffffff"
+        // Optimize shadow resolution for better performance
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+        shadow-bias={-0.001}
       />
       <spotLight 
         position={[-8, 8, -8]} 
         intensity={0.6} 
         angle={0.3} 
         penumbra={0.7}
-        castShadow
         color="#f0f0f0"
+        // Disable shadows on secondary lights for performance
+        castShadow={false}
       />
       
       {/* Added accent lights with Voltaris colors */}
@@ -46,48 +65,55 @@ function EnhancedLighting() {
   );
 }
 
-// Model component with enhanced materials
-function EnhancedCarModel() {
+// Model component with optimized loading and rendering
+function OptimizedCarModel() {
   // Fix the model path to use the proper location with process.env.PUBLIC_URL
   const modelPath = process.env.PUBLIC_URL + '/models/model_3d.gltf';
-  const { scene } = useGLTF(modelPath);
-  const [hovered, setHovered] = useState(false);
   const groupRef = useRef();
+  const [model, setModel] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hovered, setHovered] = useState(false);
   
-  // Apply enhanced materials to model and optimize performance
+  // Load the model using our optimized loader
   useEffect(() => {
-    // Enable instancing for better performance
-    scene.traverse((child) => {
-      if (child.isMesh && child.geometry) {
-        child.geometry.computeVertexNormals();
-        // Enable instancing if possible
-        if (child.material && child.material.map) {
-          child.material.map.anisotropy = 16;
+    let isMounted = true;
+
+    const loadModel = async () => {
+      try {
+        const optimizedModel = await loadOptimizedModel(
+          modelPath,
+          (progress) => {
+            // You could update a progress indicator here
+            console.log(`Loading model: ${progress.toFixed(2)}%`);
+          }
+        );
+        
+        // Apply BVH for better raycasting performance
+        optimizedModel.traverse((child) => {
+          if (child.isMesh && child.geometry) {
+            useBVH(child);
+          }
+        });
+        
+        if (isMounted) {
+          setModel(optimizedModel);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Failed to load model:', error);
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
-    });
-    scene.traverse((child) => {
-      if (child.isMesh) {
-        // Apply better material properties
-        if (child.material) {
-          // Create a physical material for more realistic rendering
-          const newMaterial = new THREE.MeshPhysicalMaterial({
-            color: child.material.color || new THREE.Color(0x888888),
-            metalness: 0.85,
-            roughness: 0.2,
-            clearcoat: 0.4,
-            clearcoatRoughness: 0.2,
-            envMapIntensity: 1.2,
-            reflectivity: 0.6
-          });
-          
-          child.material = newMaterial;
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
-      }
-    });
-  }, [scene]);
+    };
+
+    loadModel();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [modelPath]);
   
   // Handle hover state
   const handlePointerOver = () => setHovered(true);
@@ -95,7 +121,7 @@ function EnhancedCarModel() {
   
   // Subtle animation
   useFrame((state) => {
-    if (groupRef.current) {
+    if (groupRef.current && model) {
       // Subtle vertical floating motion
       groupRef.current.position.y = Math.sin(state.clock.getElapsedTime() * 0.3) * 0.03;
       
@@ -108,6 +134,10 @@ function EnhancedCarModel() {
     }
   });
   
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+  
   return (
     <group 
       ref={groupRef}
@@ -116,78 +146,65 @@ function EnhancedCarModel() {
       position={[0, 0, 0]}
       scale={[0.5, 0.5, 0.5]}
     >
-      <primitive object={scene} />
+      {model && <primitive object={model} />}
     </group>
   );
 }
 
-// Main enhanced model viewer component without any UI elements
+// Main component with performance optimizations
 const EnhancedModelViewer = forwardRef((props, ref) => {
   // Camera controls reference
   const controlsRef = useRef();
   const cameraRef = useRef();
-  const initialCameraPosition = [2, 0.7, 3];
-  const initialTarget = [0, 0, 0];
-
-  // Function to reset camera view
-  const resetCameraView = () => {
-    console.log("resetCameraView called in EnhancedModelViewer");
-    
-    if (controlsRef.current) {
-      // First try the standard reset
-      controlsRef.current.reset();
-      
-      // Then force the position and target update
-      controlsRef.current.object.position.set(...initialCameraPosition);
-      controlsRef.current.target.set(...initialTarget);
-      
-      // Make sure updates are applied
-      controlsRef.current.update();
-      
-      console.log("Camera position after reset:", 
-        controlsRef.current.object.position,
-        "Target:", controlsRef.current.target);
-    }
-  };
   
-  // Expose reset method via ref
+  // Define initial camera position
+  const initialCameraPosition = [2, 1, 2];
+  
+  // Expose controls to parent components
   useImperativeHandle(ref, () => ({
-    resetCameraView: () => {
-      console.log("resetCameraView called via ref");
-      resetCameraView();
+    resetCamera: () => {
+      if (controlsRef.current) {
+        controlsRef.current.reset();
+      }
+    },
+    rotateTo: (x, y, z) => {
+      if (controlsRef.current) {
+        controlsRef.current.setAzimuthalAngle(x);
+        controlsRef.current.setPolarAngle(y);
+        controlsRef.current.setRadius(z);
+      }
+    },
+    focusOn: (position = [0, 0, 0]) => {
+      if (controlsRef.current) {
+        controlsRef.current.target.set(...position);
+        controlsRef.current.update();
+      }
     }
-  }), []);
+  }));
   
-  // Event listener for resetting the camera view
-  useEffect(() => {
-    const handleResetView = () => {
-      console.log("Reset view event received");
-      resetCameraView();
-    };
-    
-    window.addEventListener('reset-view', handleResetView);
-    return () => window.removeEventListener('reset-view', handleResetView);
-  }, []);
+  // Calculate a proper pixel ratio for performance
+  const pixelRatio = Math.min(window.devicePixelRatio, 1.5);
   
   return (
     <div className="w-full h-full bg-black/80"> {/* Added dark background for the container */}
       <Canvas 
-      shadows
-      camera={{ position: initialCameraPosition, fov: 45 }}
-      dpr={window.devicePixelRatio > 1 ? 1.5 : 1} // Performance optimization
-      gl={{ 
-        antialias: true, 
-        outputColorSpace: THREE.SRGBColorSpace,
-        toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 0.8 // Slightly darker exposure
-      }}
+        shadows
+        camera={{ position: initialCameraPosition, fov: 45 }}
+        dpr={pixelRatio} // Limit pixel ratio for performance
+        gl={{ 
+          antialias: true, 
+          outputColorSpace: THREE.SRGBColorSpace,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 0.8, // Slightly darker exposure
+          // Performance optimizations
+          powerPreference: "high-performance",
+          precision: "highp",
+          physicallyCorrectLights: false, // Disable for performance
+          logarithmicDepthBuffer: false
+        }}
+        performance={{ min: 0.5 }} // Allow performance adaptation
       >
-        <Suspense fallback={
-          <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color="#111111" />
-          </mesh>
-        }>
+        <Suspense fallback={<LoadingIndicator />}>
           <color attach="background" args={["#050505"]} /> {/* Changed to dark background color */}
           <fog attach="fog" args={["#050505", 10, 50]} />
           
@@ -206,7 +223,7 @@ const EnhancedModelViewer = forwardRef((props, ref) => {
             floatIntensity={0.1}
             floatingRange={[-0.05, 0.05]}
           >
-            <EnhancedCarModel />
+            <OptimizedCarModel />
           </Float>
           
           <ContactShadows 
@@ -215,6 +232,7 @@ const EnhancedModelViewer = forwardRef((props, ref) => {
             scale={10} 
             blur={1.5} 
             far={5} 
+            resolution={256} // Reduced resolution for better performance
           />
           
           {/* Added technical grid floor */}
@@ -223,7 +241,7 @@ const EnhancedModelViewer = forwardRef((props, ref) => {
             position={[0, -1.7, 0]} 
             receiveShadow
           >
-            <planeGeometry args={[30, 30, 50, 50]} />
+            <planeGeometry args={[30, 30, 20, 20]} /> {/* Reduced grid detail */}
             <meshStandardMaterial 
               color="#050505" 
               metalness={0.8} 

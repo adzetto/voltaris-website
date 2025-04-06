@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Text } from '@react-three/drei';
 import TechnicalDataViz from './TechnicalDataViz';
@@ -18,6 +19,19 @@ import TechnicalModelViewer from './components/TechnicalModelViewer';
 import EnhancedSponsorsBar from './components/EnhancedSponsorsBar';
 import './styles.css';
 import { useMouseTrail, useParallax, useScrollAnimation, useTechnicalSpecsAnimation } from './hooks/useInteractive';
+import { setupOptimizers } from './utils/ModelOptimizer';
+
+// Initialize optimizers
+setupOptimizers();
+
+// Limit texture sizes for better performance
+THREE.TextureLoader.prototype.crossOrigin = 'anonymous';
+THREE.Cache.enabled = true;
+
+// Set default pixel ratio for better performance
+if (window.devicePixelRatio > 2) {
+  THREE.setPixelRatio(2); // Cap at 2x for better performance
+}
 
 // ADAS Components Implementation
 export const AdasFeatureCard = ({ title, description, icon, color = "red", imageUrl }) => {
@@ -192,185 +206,318 @@ const CarModel = () => {
   const [clicked, setClicked] = useState(false);
   const [activePart, setActivePart] = useState(null);
   const [specs, setSpecs] = useState({});
-  
-  // Use a default fallback model if the actual model fails to load
-  // eslint-disable-next-line no-unused-vars
   const [modelLoaded, setModelLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
-  
-  // Update the path to use public folder - React will look for assets in the public directory
-  const modelPath = process.env.PUBLIC_URL + '/models/model_3d.gltf';
-  
-  // Technical specifications for different parts of the car
-  const carSpecs = {
-    body: {
-      title: "VOLTARIS VOL-1",
-      specs: [
-        "Cam Elyaf Kabuk",
-        "Aerodinamik Optimize",
-        "230kg Toplam Ağırlık",
-        "3136mm Uzunluk"
-      ]
-    },
-    wheels: {
-      title: "Tekerlekler",
-      specs: [
-        "17\" Çap",
-        "Hafif Alaşım",
-        "Düşük Yuvarlanma Direnci",
-        "2.5 bar Basınç"
-      ]
-    },
-    motor: {
-      title: "Motor",
-      specs: [
-        "2x2.5kW BLDC Hub Motor",
-        "%92 Verimlilik",
-        "785 RPM Nominal Hız",
-        "30.39 Nm Tork"
-      ]
-    },
-    battery: {
-      title: "Batarya",
-      specs: [
-        "3458 Wh Enerji",
-        "68.97V Nominal Gerilim",
-        "50Ah Kapasite",
-        "100+ km Menzil"
-      ]
-    }
-  };
-  
-  // Handle pointer events for interactive 3D elements
-  const handlePointerOver = (e, part) => {
-    e.stopPropagation();
-    setHovered(true);
-    setActivePart(part);
-    setSpecs(carSpecs[part]);
-    document.body.style.cursor = "pointer";
-  };
-  
-  const handlePointerOut = (e) => {
-    e.stopPropagation();
-    setHovered(false);
-    document.body.style.cursor = "auto";
-  };
-  
-  const handleClick = (e, part) => {
-    e.stopPropagation();
-    setClicked(!clicked);
-    setActivePart(part);
-    setSpecs(carSpecs[part]);
-  };
+  const [loadProgress, setLoadProgress] = useState(0);
   
   useEffect(() => {
-    // Store the current ref value
+    // Store the ref in a variable to avoid React warnings
     const currentGroup = group.current;
+    wheelsRef.current = [];
+    lightsRef.current = [];
     
-    // Try to load the model
+    if (!currentGroup) return;
+    
+    // Create a path to our 3D model, using the correct public URL path
+    const modelPath = `${process.env.PUBLIC_URL}/3D/model_3d/Part2_v4_ass-1.bin`;
+    
+    // Set up DRACO decoder - use the generic CDN for broader compatibility
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+    dracoLoader.setDecoderConfig({ type: 'js' }); // Use JS decoder for compatibility
+    
+    // Configure the GLTF loader with DRACO support
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+    
     try {
-      // Load the model directly in the component to handle errors
-      const gltfLoader = new GLTFLoader();
+      // First attempt to fetch to detect any network issues
+      fetch(modelPath)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch model: ${response.status} ${response.statusText}`);
+          }
+          return response;
+        })
+        .catch(error => {
+          console.error('Model fetch error:', error);
+          // Create fallback model if fetch fails
+          if (currentGroup) {
+            const fallbackModel = createFallbackModel();
+            currentGroup.add(fallbackModel);
+            setModelLoaded(true);
+          }
+        });
       
-      // Remove renderer from three.js for better memory usage
-      THREE.Cache.enabled = true;
-      
+      // Use GLTFLoader with progress tracking
       gltfLoader.load(
         modelPath,
         (gltf) => {
-          const modelScene = gltf.scene.clone();
-          
-          // Apply materials and optimizations after model is loaded
-          modelScene.traverse((child) => {
-            if (child.isMesh) {
-              // Ensure the model casts and receives shadows
-              child.castShadow = true;
-              child.receiveShadow = true;
-              
-              // Enhance material properties if needed
-              if (child.material) {
-                child.material.roughness = 0.7;
-                child.material.metalness = 0.8;
-                
-                // Add interactivity for special parts by detecting name patterns
-                if (child.name.toLowerCase().includes('body')) {
-                  bodyRef.current = child;
-                  child.userData.part = 'body';
-                } else if (child.name.toLowerCase().includes('wheel')) {
-                  wheelsRef.current.push(child);
-                  child.userData.part = 'wheels';
-                } else if (child.name.toLowerCase().includes('light')) {
-                  lightsRef.current.push(child);
-                  child.userData.part = 'lights';
-                  
-                  // Add emissive material for lights
-                  child.material.emissive = new THREE.Color(0xff4254);
-                  child.material.emissiveIntensity = 1;
-                }
-                
-                // Make parts interactive
-                child.material = child.material.clone(); // Ensure we don't modify shared materials
-              }
-            }
-          });
-          
-          // Center the model properly
-          const box = new THREE.Box3().setFromObject(modelScene);
-          const center = box.getCenter(new THREE.Vector3());
-          const size = box.getSize(new THREE.Vector3());
-              
-              // Optimize geometry to reduce memory usage
-              modelScene.traverse((child) => {
-                if (child.isMesh && child.geometry) {
-                  child.geometry.dispose();
-                  child.geometry = child.geometry.toNonIndexed();
-                  child.geometry.computeVertexNormals();
-                }
-              });
-          
-          // Set the model to the center of the scene
-          modelScene.position.x = -center.x;
-          modelScene.position.y = -center.y;
-          modelScene.position.z = -center.z;
-          
-          // Scale the model to fit the view if needed
-          const scale = 0.5 / Math.max(size.x, size.y, size.z);
-          modelScene.scale.set(scale, scale, scale);
-          
-          // Add the model to our group
           if (currentGroup) {
-            currentGroup.add(modelScene);
+            // Performance optimization: disable matrixAutoUpdate for static parts
+            gltf.scene.traverse((child) => {
+              if (child.isMesh) {
+                // Identify car parts for interactive features
+                if (child.name.includes('body') || child.name.includes('chassis')) {
+                  bodyRef.current = child;
+                } else if (child.name.includes('wheel')) {
+                  wheelsRef.current.push(child);
+                } else if (child.name.includes('light') || child.name.includes('lamp')) {
+                  lightsRef.current.push(child);
+                }
+                
+                // Performance optimizations
+                child.matrixAutoUpdate = false;
+                child.frustumCulled = true;
+                
+                // Only allow large objects to cast shadows for better performance
+                const boundingBox = new THREE.Box3().setFromObject(child);
+                const size = boundingBox.getSize(new THREE.Vector3());
+                const maxDimension = Math.max(size.x, size.y, size.z);
+                child.castShadow = maxDimension > 0.5;
+                child.receiveShadow = true;
+                
+                // Apply optimized materials
+                if (child.material) {
+                  // Optimize textures
+                  if (child.material.map) {
+                    child.material.map.anisotropy = 4; // Good balance of quality/performance
+                    child.material.map.minFilter = THREE.LinearFilter;
+                  }
+                  
+                  // Set material properties for better performance
+                  if (child.name.includes('body')) {
+                    child.material = new THREE.MeshPhysicalMaterial({
+                      color: new THREE.Color(0x2a2a2a),
+                      metalness: 0.9,
+                      roughness: 0.1,
+                      clearcoat: 0.5,
+                      clearcoatRoughness: 0.1
+                    });
+                  } else if (child.name.includes('window') || child.name.includes('glass')) {
+                    child.material = new THREE.MeshPhysicalMaterial({
+                      color: new THREE.Color(0xffffff),
+                      transmission: 0.9,
+                      transparent: true,
+                      metalness: 0.1,
+                      roughness: 0.05
+                    });
+                  } else if (child.name.includes('light') || child.name.includes('lamp')) {
+                    child.material = new THREE.MeshBasicMaterial({
+                      color: new THREE.Color(0xffffff),
+                      emissive: new THREE.Color(0xffffaa),
+                      emissiveIntensity: 1.0
+                    });
+                  }
+                }
+                
+                // Update matrix once
+                child.updateMatrix();
+              }
+            });
+            
+            // Add the model to our scene
+            currentGroup.add(gltf.scene);
             setModelLoaded(true);
+            
+            // Extract specs from the model for information display
+            setSpecs({
+              polygons: getPolygonCount(gltf.scene),
+              materials: getMaterialCount(gltf.scene),
+              textures: getTextureCount(gltf.scene)
+            });
           }
+          
+          // Clean up DRACO loader
+          dracoLoader.dispose();
         },
         // Progress callback
-        undefined,
+        (xhr) => {
+          if (xhr.lengthComputable) {
+            const percentComplete = Math.round((xhr.loaded / xhr.total) * 100);
+            setLoadProgress(percentComplete);
+          }
+        },
         // Error callback
         (error) => {
           console.error('Error loading 3D model:', error);
           setLoadError(true);
+          
+          // Create fallback model if loading fails
+          if (currentGroup) {
+            const fallbackModel = createFallbackModel();
+            currentGroup.add(fallbackModel);
+            setModelLoaded(true);
+          }
         }
       );
     } catch (error) {
-      console.error('Error in useEffect when loading model:', error);
+      console.error('Error setting up 3D model loader:', error);
       setLoadError(true);
+      
+      // Create fallback model on error
+      if (currentGroup) {
+        const fallbackModel = createFallbackModel();
+        currentGroup.add(fallbackModel);
+        setModelLoaded(true);
+      }
     }
     
-    // If model failed to load, use our fallback interactive model
-    if (loadError) {
-      setActivePart('body');
-      setSpecs(carSpecs.body);
-    }
-    
-    // Cleanup function - use the stored reference
+    // Clean up function to remove the model when component unmounts
     return () => {
       if (currentGroup) {
-        while(currentGroup.children.length > 0) {
+        // Dispose of geometries and textures to prevent memory leaks
+        currentGroup.traverse((child) => {
+          if (child.isMesh) {
+            child.geometry.dispose();
+            if (child.material.map) child.material.map.dispose();
+            child.material.dispose();
+          }
+        });
+        
+        // Remove all children
+        while (currentGroup.children.length > 0) {
           currentGroup.remove(currentGroup.children[0]);
         }
       }
     };
-  }, [modelPath, loadError, carSpecs.body]);
+  }, []);
+  
+  // Helper functions to get model statistics
+  const getPolygonCount = (model) => {
+    let polygons = 0;
+    model.traverse((child) => {
+      if (child.isMesh && child.geometry) {
+        polygons += child.geometry.attributes.position.count / 3;
+      }
+    });
+    return Math.round(polygons);
+  };
+  
+  const getMaterialCount = (model) => {
+    const materials = new Set();
+    model.traverse((child) => {
+      if (child.isMesh && child.material) {
+        materials.add(child.material);
+      }
+    });
+    return materials.size;
+  };
+  
+  const getTextureCount = (model) => {
+    const textures = new Set();
+    model.traverse((child) => {
+      if (child.isMesh && child.material) {
+        if (child.material.map) textures.add(child.material.map);
+        if (child.material.normalMap) textures.add(child.material.normalMap);
+        if (child.material.roughnessMap) textures.add(child.material.roughnessMap);
+        if (child.material.metalnessMap) textures.add(child.material.metalnessMap);
+      }
+    });
+    return textures.size;
+  };
+  
+  // Creates a simple fallback model if the main model fails to load
+  const createFallbackModel = () => {
+    const fallbackGroup = new THREE.Group();
+    
+    // Create a simple car body
+    const bodyGeometry = new THREE.BoxGeometry(2, 0.6, 4);
+    const bodyMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x2a2a2a,
+      metalness: 0.9,
+      roughness: 0.2,
+    });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.position.y = 0.6;
+    fallbackGroup.add(body);
+    
+    // Create wheels
+    const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.2, 16);
+    const wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x111111 });
+    
+    // Front-left wheel
+    const wheelFL = new THREE.Mesh(wheelGeometry, wheelMaterial);
+    wheelFL.rotation.z = Math.PI / 2;
+    wheelFL.position.set(-1, 0.4, -1.2);
+    fallbackGroup.add(wheelFL);
+    wheelsRef.current.push(wheelFL);
+    
+    // Front-right wheel
+    const wheelFR = new THREE.Mesh(wheelGeometry, wheelMaterial);
+    wheelFR.rotation.z = Math.PI / 2;
+    wheelFR.position.set(1, 0.4, -1.2);
+    fallbackGroup.add(wheelFR);
+    wheelsRef.current.push(wheelFR);
+    
+    // Rear-left wheel
+    const wheelRL = new THREE.Mesh(wheelGeometry, wheelMaterial);
+    wheelRL.rotation.z = Math.PI / 2;
+    wheelRL.position.set(-1, 0.4, 1.2);
+    fallbackGroup.add(wheelRL);
+    wheelsRef.current.push(wheelRL);
+    
+    // Rear-right wheel
+    const wheelRR = new THREE.Mesh(wheelGeometry, wheelMaterial);
+    wheelRR.rotation.z = Math.PI / 2;
+    wheelRR.position.set(1, 0.4, 1.2);
+    fallbackGroup.add(wheelRR);
+    wheelsRef.current.push(wheelRR);
+    
+    // Create windows/cabin
+    const cabinGeometry = new THREE.BoxGeometry(1.8, 0.5, 2);
+    const cabinMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      metalness: 0,
+      roughness: 0,
+      transmission: 0.9,
+      transparent: true
+    });
+    const cabin = new THREE.Mesh(cabinGeometry, cabinMaterial);
+    cabin.position.set(0, 1.1, 0);
+    fallbackGroup.add(cabin);
+    
+    // Create lights
+    const lightGeometry = new THREE.BoxGeometry(0.3, 0.1, 0.1);
+    const lightMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffaa,
+      emissive: 0xffffaa
+    });
+    
+    // Front lights
+    const lightFL = new THREE.Mesh(lightGeometry, lightMaterial);
+    lightFL.position.set(-0.7, 0.7, -2);
+    fallbackGroup.add(lightFL);
+    lightsRef.current.push(lightFL);
+    
+    const lightFR = new THREE.Mesh(lightGeometry, lightMaterial);
+    lightFR.position.set(0.7, 0.7, -2);
+    fallbackGroup.add(lightFR);
+    lightsRef.current.push(lightFR);
+    
+    return fallbackGroup;
+  };
+  
+  const handlePointerOver = (e, part) => {
+    if (!modelLoaded) return;
+    e.stopPropagation();
+    setHovered(true);
+    setActivePart(part);
+  };
+  
+  const handlePointerOut = (e) => {
+    if (!modelLoaded) return;
+    e.stopPropagation();
+    setHovered(false);
+    setActivePart(null);
+  };
+  
+  const handleClick = (e, part) => {
+    if (!modelLoaded) return;
+    e.stopPropagation();
+    setClicked(!clicked);
+    setActivePart(part);
+  };
   
   useFrame((state) => {
     if (group.current) {
@@ -410,293 +557,93 @@ const CarModel = () => {
       }
     }
   });
-
-  return (
-    <>
-      <group 
-        ref={group} 
-        position={[0, -0.7, 0]}
-        onClick={(e) => handleClick(e, 'body')}
-        onPointerOver={(e) => handlePointerOver(e, 'body')}
-        onPointerOut={handlePointerOut}
-      >
-        {/* Render our custom interactive model if the real model fails to load */}
-        {loadError && (
-          <>
-            {/* Car body */}
-            <mesh 
-              position={[0, 0.4, 0]} 
-              castShadow
-              userData={{ part: 'body' }}
-              onClick={(e) => handleClick(e, 'body')}
-              onPointerOver={(e) => handlePointerOver(e, 'body')}
-              onPointerOut={handlePointerOut}
-            >
-              <boxGeometry args={[3, 0.6, 1.3]} />
-              <meshStandardMaterial 
-                color="#0A0A14" 
-                metalness={0.9} 
-                roughness={0.1}
-                emissive={activePart === 'body' ? "#ff4254" : "#000000"}
-                emissiveIntensity={activePart === 'body' ? 0.2 : 0}
-              />
-            </mesh>
-            
-            {/* Cabin */}
-            <mesh 
-              position={[0, 0.9, 0]} 
-              castShadow
-              userData={{ part: 'body' }}
-              onClick={(e) => handleClick(e, 'body')}
-              onPointerOver={(e) => handlePointerOver(e, 'body')}
-              onPointerOut={handlePointerOut}
-            >
-              <boxGeometry args={[1.5, 0.5, 1.2]} />
-              <meshStandardMaterial 
-                color="#080810" 
-                metalness={0.8} 
-                roughness={0.2}
-                emissive={activePart === 'body' ? "#ff4254" : "#000000"}
-                emissiveIntensity={activePart === 'body' ? 0.1 : 0}
-              />
-            </mesh>
-            
-            {/* Wheels */}
-            <mesh 
-              position={[0.8, 0, 0.7]} 
-              castShadow
-              userData={{ part: 'wheels' }}
-              onClick={(e) => handleClick(e, 'wheels')}
-              onPointerOver={(e) => handlePointerOver(e, 'wheels')}
-              onPointerOut={handlePointerOut}
-            >
-              <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} rotation={[Math.PI / 2, 0, 0]} />
-              <meshStandardMaterial 
-                color="#050505" 
-                metalness={0.5} 
-                roughness={0.7}
-                emissive={activePart === 'wheels' ? "#0044ff" : "#000000"}
-                emissiveIntensity={activePart === 'wheels' ? 0.3 : 0}
-              />
-            </mesh>
-            <mesh 
-              position={[0.8, 0, -0.7]} 
-              castShadow
-              userData={{ part: 'wheels' }}
-              onClick={(e) => handleClick(e, 'wheels')}
-              onPointerOver={(e) => handlePointerOver(e, 'wheels')}
-              onPointerOut={handlePointerOut}
-            >
-              <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} rotation={[Math.PI / 2, 0, 0]} />
-              <meshStandardMaterial 
-                color="#050505" 
-                metalness={0.5} 
-                roughness={0.7}
-                emissive={activePart === 'wheels' ? "#0044ff" : "#000000"}
-                emissiveIntensity={activePart === 'wheels' ? 0.3 : 0}
-              />
-            </mesh>
-            <mesh 
-              position={[-0.8, 0, 0.7]} 
-              castShadow
-              userData={{ part: 'wheels' }}
-              onClick={(e) => handleClick(e, 'wheels')}
-              onPointerOver={(e) => handlePointerOver(e, 'wheels')}
-              onPointerOut={handlePointerOut}
-            >
-              <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} rotation={[Math.PI / 2, 0, 0]} />
-              <meshStandardMaterial 
-                color="#050505" 
-                metalness={0.5} 
-                roughness={0.7}
-                emissive={activePart === 'wheels' ? "#0044ff" : "#000000"}
-                emissiveIntensity={activePart === 'wheels' ? 0.3 : 0}
-              />
-            </mesh>
-            <mesh 
-              position={[-0.8, 0, -0.7]} 
-              castShadow
-              userData={{ part: 'wheels' }}
-              onClick={(e) => handleClick(e, 'wheels')}
-              onPointerOver={(e) => handlePointerOver(e, 'wheels')}
-              onPointerOut={handlePointerOut}
-            >
-              <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} rotation={[Math.PI / 2, 0, 0]} />
-              <meshStandardMaterial 
-                color="#050505" 
-                metalness={0.5} 
-                roughness={0.7}
-                emissive={activePart === 'wheels' ? "#0044ff" : "#000000"}
-                emissiveIntensity={activePart === 'wheels' ? 0.3 : 0}
-              />
-            </mesh>
-            
-            {/* Motors */}
-            <mesh 
-              position={[0.8, 0, 0]} 
-              castShadow
-              userData={{ part: 'motor' }}
-              onClick={(e) => handleClick(e, 'motor')}
-              onPointerOver={(e) => handlePointerOver(e, 'motor')}
-              onPointerOut={handlePointerOut}
-            >
-              <cylinderGeometry args={[0.2, 0.2, 0.3, 16]} />
-              <meshStandardMaterial 
-                color="#303030" 
-                metalness={0.9} 
-                roughness={0.2}
-                emissive={activePart === 'motor' ? "#ff4254" : "#000000"}
-                emissiveIntensity={activePart === 'motor' ? 0.5 : 0}
-              />
-            </mesh>
-            <mesh 
-              position={[-0.8, 0, 0]} 
-              castShadow
-              userData={{ part: 'motor' }}
-              onClick={(e) => handleClick(e, 'motor')}
-              onPointerOver={(e) => handlePointerOver(e, 'motor')}
-              onPointerOut={handlePointerOut}
-            >
-              <cylinderGeometry args={[0.2, 0.2, 0.3, 16]} />
-              <meshStandardMaterial 
-                color="#303030" 
-                metalness={0.9} 
-                roughness={0.2}
-                emissive={activePart === 'motor' ? "#ff4254" : "#000000"}
-                emissiveIntensity={activePart === 'motor' ? 0.5 : 0}
-              />
-            </mesh>
-            
-            {/* Battery */}
-            <mesh 
-              position={[0, 0.1, 0]} 
-              castShadow
-              userData={{ part: 'battery' }}
-              onClick={(e) => handleClick(e, 'battery')}
-              onPointerOver={(e) => handlePointerOver(e, 'battery')}
-              onPointerOut={handlePointerOut}
-            >
-              <boxGeometry args={[1.8, 0.2, 0.8]} />
-              <meshStandardMaterial 
-                color="#1A1A1A" 
-                metalness={0.7} 
-                roughness={0.3}
-                emissive={activePart === 'battery' ? "#0044ff" : "#000000"}
-                emissiveIntensity={activePart === 'battery' ? 0.3 : 0}
-              />
-            </mesh>
-            
-            {/* Red accent lights */}
-            <mesh 
-              position={[1.5, 0.4, 0.5]} 
-              castShadow
-              userData={{ part: 'body' }}
-            >
-              <boxGeometry args={[0.1, 0.1, 0.3]} />
-              <meshStandardMaterial 
-                color="#FF2233" 
-                emissive="#FF0000" 
-                emissiveIntensity={1.5 + Math.sin(Date.now() * 0.001) * 0.5}
-              />
-            </mesh>
-            <mesh 
-              position={[1.5, 0.4, -0.5]} 
-              castShadow
-              userData={{ part: 'body' }}
-            >
-              <boxGeometry args={[0.1, 0.1, 0.3]} />
-              <meshStandardMaterial 
-                color="#FF2233" 
-                emissive="#FF0000" 
-                emissiveIntensity={1.5 + Math.sin(Date.now() * 0.001) * 0.5}
-              />
-            </mesh>
-            
-            {/* Blue accent lights */}
-            <mesh 
-              position={[-1.5, 0.4, 0.5]} 
-              castShadow
-              userData={{ part: 'body' }}
-            >
-              <boxGeometry args={[0.1, 0.1, 0.3]} />
-              <meshStandardMaterial 
-                color="#0044FF" 
-                emissive="#0044FF" 
-                emissiveIntensity={1.2 + Math.sin(Date.now() * 0.001 + Math.PI) * 0.5}
-              />
-            </mesh>
-            <mesh 
-              position={[-1.5, 0.4, -0.5]} 
-              castShadow
-              userData={{ part: 'body' }}
-            >
-              <boxGeometry args={[0.1, 0.1, 0.3]} />
-              <meshStandardMaterial 
-                color="#0044FF" 
-                emissive="#0044FF" 
-                emissiveIntensity={1.2 + Math.sin(Date.now() * 0.001 + Math.PI) * 0.5}
-              />
-            </mesh>
-          </>
-        )}
-        
-        {/* Custom lighting effects to highlight the car */}
-        <spotLight 
-          position={[5, 5, 5]} 
-          angle={0.3} 
-          penumbra={0.8} 
-          intensity={1} 
-          color="#ff4254" 
-          castShadow 
-        />
-        <spotLight 
-          position={[-5, 5, -5]} 
-          angle={0.3} 
-          penumbra={0.8} 
-          intensity={1} 
-          color="#0044ff" 
-          castShadow 
-        />
+  
+  // Render loading indicator if model is not yet loaded
+  if (!modelLoaded && !loadError) {
+    return (
+      <group>
+        {/* Loading indicator */}
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[0.5, 0.5, 0.5]} />
+          <meshStandardMaterial color="#444444" />
+        </mesh>
+        <Text 
+          position={[0, -1, 0]} 
+          color="white"
+          fontSize={0.2}
+          anchorX="center"
+          anchorY="middle"
+        >
+          {`Loading model... ${loadProgress}%`}
+        </Text>
       </group>
+    );
+  }
+  
+  // Warning for loading errors
+  if (loadError) {
+    return (
+      <group>
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[0.5, 0.5, 0.5]} />
+          <meshStandardMaterial color="#FF4254" />
+        </mesh>
+        <Text 
+          position={[0, -1, 0]} 
+          color="#FF4254"
+          fontSize={0.2}
+          anchorX="center"
+          anchorY="middle"
+        >
+          Error loading model
+        </Text>
+      </group>
+    );
+  }
+  
+  return (
+    <group 
+      ref={group} 
+      position={[0, 0, 0]}
+      onPointerOver={(e) => handlePointerOver(e, 'model')}
+      onPointerOut={handlePointerOut}
+      onClick={(e) => handleClick(e, 'model')}
+    >
+      {/* Model will be added to this group via useEffect */}
       
-      {/* Floating specs panel */}
-      {(hovered || clicked) && specs && (
+      {/* Display technical specs if model is loaded */}
+      {modelLoaded && specs.polygons && (
         <group position={[2, 0, 0]}>
-          <mesh position={[0, 0.5, 0]}>
-            <planeGeometry args={[2, 1.5]} />
-            <meshBasicMaterial 
-              color="#000000" 
-              opacity={0.7} 
-              transparent 
-              side={THREE.DoubleSide} 
-            />
-          </mesh>
           <Text
-            position={[0, 1.1, 0.1]}
+            position={[0, 0.5, 0]} 
+            color="#FF4254"
             fontSize={0.15}
-            color="#ff4254"
-            font="/fonts/Inter-Bold.woff"
-            anchorX="center"
+            anchorX="left"
             anchorY="middle"
           >
-            {specs.title || "VOLTARIS"}
+            {`Polygons: ${specs.polygons.toLocaleString()}`}
           </Text>
-          {specs.specs && specs.specs.map((spec, index) => (
-            <Text
-              key={index}
-              position={[0, 0.9 - index * 0.2, 0.1]}
-              fontSize={0.1}
-              color="#ffffff"
-              font="/fonts/Inter-Regular.woff"
-              anchorX="center"
-              anchorY="middle"
-            >
-              {spec}
-            </Text>
-          ))}
+          <Text
+            position={[0, 0.2, 0]} 
+            color="#FF4254"
+            fontSize={0.15}
+            anchorX="left"
+            anchorY="middle"
+          >
+            {`Materials: ${specs.materials}`}
+          </Text>
+          <Text
+            position={[0, -0.1, 0]} 
+            color="#FF4254"
+            fontSize={0.15}
+            anchorX="left"
+            anchorY="middle"
+          >
+            {`Textures: ${specs.textures}`}
+          </Text>
         </group>
       )}
-    </>
+    </group>
   );
 };
 
