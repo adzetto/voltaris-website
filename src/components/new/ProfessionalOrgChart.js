@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Cpu, Wrench, Briefcase, ChevronDown, ChevronRight, X, Mail, Linkedin, Info, Battery } from 'lucide-react';
+import '../OrganizationChartMobile.css';
 
 const ProfessionalOrgChart = ({ teamData }) => {
   // This is the updated professional academic version with no mouse-following effects
@@ -198,7 +199,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
   if (!teamData) return null;
   
   return (
-    <div className="w-full bg-black/30 backdrop-blur-sm p-6 rounded-lg border border-gray-800 shadow-xl">
+    <div className="w-full bg-black/30 backdrop-blur-sm p-3 sm:p-6 rounded-lg border border-gray-800 shadow-xl">
       <h3 className="text-2xl font-bold mb-8 text-center">
         <span className="bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">Organizasyon Yapımız</span>
         <div className="h-1 w-20 bg-gradient-to-r from-blue-700 to-blue-900 mx-auto mt-2"></div>
@@ -207,7 +208,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
       {/* Main Organization Chart */}
       <div className="org-chart">
         {/* Board Level - Top Level with Advisor and Captain Side by Side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 sm:mb-12">
           {/* Academic Advisor */}
           <div className="flex justify-center">
             <div 
@@ -314,7 +315,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
         <div className="horizontal-connector-wide mx-auto mb-8"></div>
         
         {/* Unit Captains Level - Directors Level */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Electronics Team */}
           <div className="flex flex-col items-center">
             <div 
@@ -545,14 +546,14 @@ const ProfessionalOrgChart = ({ teamData }) => {
         </div>
         
         {/* Detayları Göster Butonu - Ayrı blok olarak */}
-        <div className="flex justify-center mb-8 gap-8">
+        <div className="flex flex-wrap justify-center mb-8 gap-3 px-2">
           <button 
-            className={`px-4 py-2 bg-blue-900/30 text-white rounded-lg hover:bg-blue-900/50 transition-colors ${isSectionExpanded('electronics') ? 'border border-blue-700/50' : ''} shadow-md`}
+            className={`px-3 py-2 mb-2 w-full sm:w-auto bg-blue-900/30 text-white rounded-lg hover:bg-blue-900/50 transition-colors ${isSectionExpanded('electronics') ? 'border border-blue-700/50' : ''} shadow-md`}
             onClick={() => toggleSection('electronics')}
           >
-            <div className="flex items-center">
+            <div className="flex items-center justify-center flex-wrap">
               <Cpu className="mr-2 text-blue-400" size={18} />
-              <span>Elektrik Elektronik Birimi</span>
+              <span className="text-sm sm:text-base">Elektrik Elektronik Birimi</span>
               {isSectionExpanded('electronics') ? (
                 <ChevronDown size={14} className="ml-2" />
               ) : (
@@ -562,12 +563,12 @@ const ProfessionalOrgChart = ({ teamData }) => {
           </button>
           
           <button 
-            className={`px-4 py-2 bg-blue-900/30 text-white rounded-lg hover:bg-blue-900/50 transition-colors ${isSectionExpanded('mechanical') ? 'border border-blue-700/50' : ''} shadow-md`}
+            className={`px-3 py-2 mb-2 w-full sm:w-auto bg-blue-900/30 text-white rounded-lg hover:bg-blue-900/50 transition-colors ${isSectionExpanded('mechanical') ? 'border border-blue-700/50' : ''} shadow-md`}
             onClick={() => toggleSection('mechanical')}
           >
-            <div className="flex items-center">
+            <div className="flex items-center justify-center flex-wrap">
               <Wrench className="mr-2 text-blue-400" size={18} />
-              <span>Mekanik Birimi</span>
+              <span className="text-sm sm:text-base">Mekanik Birimi</span>
               {isSectionExpanded('mechanical') ? (
                 <ChevronDown size={14} className="ml-2" />
               ) : (
@@ -577,12 +578,12 @@ const ProfessionalOrgChart = ({ teamData }) => {
           </button>
           
           <button 
-            className={`px-4 py-2 bg-blue-900/30 text-white rounded-lg hover:bg-blue-900/50 transition-colors ${isSectionExpanded('sponsorship') ? 'border border-blue-700/50' : ''} shadow-md`}
+            className={`px-3 py-2 mb-2 w-full sm:w-auto bg-blue-900/30 text-white rounded-lg hover:bg-blue-900/50 transition-colors ${isSectionExpanded('sponsorship') ? 'border border-blue-700/50' : ''} shadow-md`}
             onClick={() => toggleSection('sponsorship')}
           >
-            <div className="flex items-center">
+            <div className="flex items-center justify-center flex-wrap">
               <Briefcase className="mr-2 text-blue-400" size={18} />
-              <span>Sponsorluk & Organizasyon</span>
+              <span className="text-sm sm:text-base">Sponsorluk & Organizasyon</span>
               {isSectionExpanded('sponsorship') ? (
                 <ChevronDown size={14} className="ml-2" />
               ) : (
@@ -599,7 +600,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
               <div className="connector-line-sm"></div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Vehicle Control System Team */}
               <div className="flex flex-col">
                 <div className="org-box sub-box bg-black/60 border border-red-500/20">
@@ -607,7 +608,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
                     <Cpu className="mr-2 text-red-500" size={18} /> Araç Kontrol Sistemi
                   </h4>
                   
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-3 px-1 sm:px-0">
                     {teamData.electronicsTeam.vehicleControlSystem?.map((member, i) => (
                       <EnhancedMemberCard 
                         key={`vcs-${i}`}
@@ -654,7 +655,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
                     <Cpu className="mr-2 text-red-500" size={18} /> Gömülü Yazılım
                   </h4>
                   
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-3 px-1 sm:px-0">
                     {teamData.electronicsTeam.embeddedSoftware?.map((member, i) => (
                       <EnhancedMemberCard 
                         key={`es-${i}`}
@@ -701,7 +702,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
                     <Battery className="mr-2 text-red-500" size={18} /> Batarya ve BYS
                   </h4>
                   
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-3 px-1 sm:px-0">
                     {teamData.electronicsTeam.batteryAndBMS?.map((member, i) => (
                       <EnhancedMemberCard 
                         key={`bms-${i}`}
@@ -751,7 +752,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
               <div className="connector-line-sm"></div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Chassis Team */}
               <div className="flex flex-col">
                 <div className="org-box sub-box bg-black/60 border border-green-500/20">
@@ -759,7 +760,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
                     <Wrench className="mr-2 text-green-500" size={18} /> Şasi ve Aktarma organları
                   </h4>
                   
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-3 px-1 sm:px-0">
                     {teamData.mechanicalTeam.chassisAndDrivetrain.map((member, i) => (
                       <EnhancedMemberCard 
                         key={`chassis-${i}`}
@@ -806,7 +807,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
                     <Wrench className="mr-2 text-green-500" size={18} /> Kabuk ve Analiz
                   </h4>
                   
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-3 px-1 sm:px-0">
                     {teamData.mechanicalTeam.shellAndAnalysis.map((member, i) => (
                       <EnhancedMemberCard 
                         key={`shell-${i}`}
@@ -853,7 +854,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
                     <Wrench className="mr-2 text-green-500" size={18} /> Powertrain ve Araç Parçaları
                   </h4>
                   
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-3 px-1 sm:px-0">
                     {teamData.mechanicalTeam.powertrainAndParts.map((member, i) => (
                       <EnhancedMemberCard 
                         key={`powertrain-${i}`}
@@ -908,7 +909,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
                 <Briefcase className="mr-2 text-blue-500" size={18} /> Sponsorluk ve Organizasyon
               </h4>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-1 sm:px-0">
                 {teamData.sponsorshipTeam.members.map((member, i) => (
                   <EnhancedMemberCard 
                     key={`sponsor-${i}`}
@@ -923,7 +924,8 @@ const ProfessionalOrgChart = ({ teamData }) => {
       </div>
       
       {/* CSS for the organization chart */}
-      <style jsx>{`
+      <style>
+        {`
         .org-chart {
           position: relative;
         }
@@ -955,6 +957,7 @@ const ProfessionalOrgChart = ({ teamData }) => {
         .director-box {
           width: 100%;
           max-width: 220px;
+          margin: 0 auto;
         }
         
         .director-box:hover {
@@ -1077,17 +1080,25 @@ const ProfessionalOrgChart = ({ teamData }) => {
           animation: fadeIn 0.3s ease-out forwards;
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
           .horizontal-connector,
           .horizontal-connector-wide {
-            width: 90%;
+            width: 95%;
           }
           
           .org-box {
             min-width: auto;
+            width: 100%;
+            max-width: 100%;
+          }
+          
+          .director-box {
+            max-width: 100%;
+            width: 100%;
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };

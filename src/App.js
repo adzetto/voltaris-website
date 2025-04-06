@@ -6,6 +6,7 @@ import {
   ArrowRight, BarChart, Activity, Zap, ChevronUp, PlusCircle, MinusCircle
 } from "lucide-react";
 import * as THREE from 'three';
+import ExpandableSection from './components/ExpandableSection';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -18,10 +19,18 @@ import { FlowingCircuitEntryAnimation, CircuitLoadingAnimation, ProfessionalOrgC
 import AdasSystemArchitecture, { LaneDetectionDiagram, TrafficSignDetectionDiagram, CruiseControlSystemDiagram, BlindSpotDetectionDiagram } from './AdasSvgComponents';
 import TechnicalModelViewer from './components/TechnicalModelViewer';
 import EnhancedSponsorsBar from './components/EnhancedSponsorsBar';
+import MobileMenuFallback from './components/MobileMenuFallback';
+import './components/PlatinumStyles.css';
+import './components/MobileMenu.css';
 import './styles.css';
+import './latex-styles.css';
+import './advanced-latex.css';
 import { useMouseTrail, useParallax, useScrollAnimation, useTechnicalSpecsAnimation } from './hooks/useInteractive';
 import { setupOptimizers } from './utils/ModelOptimizer';
+import { initMenuVisibilityController, updateMenuButtonVisibility } from './utils/MenuVisibilityController';
+import { fixMobileMenuOnOpen, fixMobileMenuOnClose, fixTechnicalSubmenu, initMobileMenuFix } from './utils/MobileMenuFix';
 import AckermannPrinciple from './components/AckermannPrinciple';
+import ContactForm from './components/ContactForm';
 
 // Initialize optimizers
 setupOptimizers();
@@ -129,26 +138,29 @@ export const AdasTechnicalDiagram = () => {
             </ul>
           </div>
           
-          <div className="bg-gray-900/80 backdrop-blur-sm p-4 rounded-lg border border-blue-900/30">
-            <h5 className="text-blue-500 font-medium mb-2 flex items-center">
-              <Cpu size={18} className="mr-2" />
-              Algoritma Birimi
-            </h5>
-            <ul className="text-sm text-gray-400 space-y-1">
-              <li className="flex items-start">
-                <div className="text-blue-500 mr-2">•</div>
-                <div>YOLOv5s Trafik İşaret Algılayıcı</div>
-              </li>
-              <li className="flex items-start">
-                <div className="text-blue-500 mr-2">•</div>
-                <div>PID Kontrolü Hız Sabitleyici</div>
-              </li>
-              <li className="flex items-start">
-                <div className="text-blue-500 mr-2">•</div>
-                <div>Görüntü İşleme ile Şerit Takibi</div>
-              </li>
-            </ul>
-          </div>
+          <div className="bg-gradient-to-br from-purple-900/30 via-black to-purple-900/20 p-6 rounded-lg border border-purple-900/30 hover:border-purple-500/40 transition-all duration-300 shadow-lg hover:shadow-purple-500/20 mt-6">
+              <div className="flex items-center mb-4">
+                <div className="text-purple-500 mr-3">
+                  <Sun size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-purple-400">Otomatik Far Sistemi</h3>
+              </div>
+              <div className="latex-style-box bg-black/40 p-4 rounded-lg border border-purple-900/30">
+                <div className="text-white math-formula purple-formula academic-formula">
+                  <div className="formula-heading">Ortam Işığı Algılama</div>
+                  <div className="formula-content">
+                    <p>Sensör: BH1750 Ortam Işığı Modülü</p>
+                    <p>Protokol: I<sup>2</sup>C Haberleşme</p>
+                    <p>Eşik: I<sub>threshold</sub> = 10 lux</p>
+                    <p>Kontrol İşlemi: L(I) = I &lt; I<sub>threshold</sub> ? "AÇIK" : "KAPALI"</p>
+                  </div>
+                  <div className="formula-parameters">Hassasiyet: 1-65535 lux | Çözünürlük: 1 lux</div>
+                </div>
+                <p className="text-gray-300 mt-3">
+                  BH1750 ortam ışığı sensörü ile ortam karanlığı algılandığında otomatik olarak araç farları aktif edilir.
+                </p>
+              </div>
+            </div>
         </div>
         
         {/* Connection diagram */}
@@ -567,19 +579,19 @@ const CarModel = () => {
   if (!modelLoaded && !loadError) {
     return (
       <group>
-        {/* Loading indicator */}
+        {/* Yükleme göstergesi */}
         <mesh position={[0, 0, 0]}>
-          <boxGeometry args={[0.5, 0.5, 0.5]} />
-          <meshStandardMaterial color="#444444" />
+        <boxGeometry args={[0.5, 0.5, 0.5]} />
+        <meshStandardMaterial color="#444444" />
         </mesh>
         <Text 
-          position={[0, -1, 0]} 
-          color="white"
-          fontSize={0.2}
-          anchorX="center"
-          anchorY="middle"
+        position={[0, -1, 0]} 
+        color="white"
+        fontSize={0.2}
+        anchorX="center"
+        anchorY="middle"
         >
-          {`Loading model... ${loadProgress}%`}
+        {`Model yükleniyor... ${loadProgress}%`}
         </Text>
       </group>
     );
@@ -600,7 +612,7 @@ const CarModel = () => {
           anchorX="center"
           anchorY="middle"
         >
-          Error loading model
+          Model yüklenemedi
         </Text>
       </group>
     );
@@ -626,7 +638,7 @@ const CarModel = () => {
             anchorX="left"
             anchorY="middle"
           >
-            {`Polygons: ${specs.polygons.toLocaleString()}`}
+            {`Poligonlar: ${specs.polygons.toLocaleString()}`}
           </Text>
           <Text
             position={[0, 0.2, 0]} 
@@ -635,7 +647,7 @@ const CarModel = () => {
             anchorX="left"
             anchorY="middle"
           >
-            {`Materials: ${specs.materials}`}
+            {`Materyaller: ${specs.materials}`}
           </Text>
           <Text
             position={[0, -0.1, 0]} 
@@ -644,7 +656,7 @@ const CarModel = () => {
             anchorX="left"
             anchorY="middle"
           >
-            {`Textures: ${specs.textures}`}
+            {`Dokular: ${specs.textures}`}
           </Text>
         </group>
       )}
@@ -774,12 +786,19 @@ function App() {
   // State declarations (but unused, could be removed later)
   const [sponsorshipModalOpen, setSponsorshipModalOpen] = useState(false);
   const [currentSponsorTier, setCurrentSponsorTier] = useState('platinum');
+  const [isMenuTransitioning, setIsMenuTransitioning] = useState(false); // Add this to prevent multiple clicks
   
   // Initialize interactive effects
   useMouseTrail();
   useParallax();
   useScrollAnimation();
   useTechnicalSpecsAnimation();
+  
+  // Update body data attribute and menu visibility when active section changes
+  useEffect(() => {
+    document.body.setAttribute('data-section', activeSection);
+    updateMenuButtonVisibility(activeSection, scrolled, true);
+  }, [activeSection, scrolled]);
   
   const [showSignature, setShowSignature] = useState(true);
 
@@ -793,6 +812,15 @@ function App() {
     const signatureTimer = setTimeout(() => {
       setShowSignature(false);
     }, 4000);
+    
+    // Initialize the menu visibility controller
+    const cleanup1 = initMenuVisibilityController(
+      () => activeSection,
+      () => scrolled
+    );
+    
+    // Initialize mobile menu fixes
+    const cleanup2 = initMobileMenuFix();
     
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -822,15 +850,23 @@ function App() {
 
         if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
           setActiveSection(sectionId);
+          
+          // Update menu button visibility when section changes
+          updateMenuButtonVisibility(sectionId, window.scrollY > 50);
         }
       });
     };
 
-    // Add event listener with the callback function
+    // Add event listener for scroll
     window.addEventListener('scroll', handleScroll);
+    
+    // Initial update for visibility
+    updateMenuButtonVisibility(activeSection, scrolled, true);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (cleanup1) cleanup1();
+      if (cleanup2) cleanup2();
       clearTimeout(loadingTimer);
       clearTimeout(signatureTimer);
     };
@@ -839,8 +875,44 @@ function App() {
   // Function for handling mobile menu toggle regardless of section
   const toggleMobileMenu = (e) => {
     if (e) e.preventDefault();
-    console.log('Toggling mobile menu');
-    setMobileMenuOpen(!mobileMenuOpen);
+    
+    // Prevent multiple rapid clicks during animation
+    if (isMenuTransitioning) return;
+    
+    // Set transitioning state to block additional clicks
+    setIsMenuTransitioning(true);
+    
+    console.log('Toggling mobile menu - current state:', mobileMenuOpen);
+    const newMenuState = !mobileMenuOpen;
+    setMobileMenuOpen(newMenuState);
+    
+    if (newMenuState) {
+      fixMobileMenuOnOpen();
+    } else {
+      fixMobileMenuOnClose();
+    }
+    
+    // Direct DOM manipulation as a fallback to ensure menu display works
+    const mobilePanel = document.querySelector('.mobile-menu-panel');
+    if (mobilePanel) {
+      console.log('Applying class to panel:', newMenuState ? 'show' : 'hide');
+      if (newMenuState) {
+        mobilePanel.classList.remove('hide');
+        mobilePanel.classList.add('show');
+        mobilePanel.style.transform = 'translateX(0)';
+      } else {
+        mobilePanel.classList.remove('show');
+        mobilePanel.classList.add('hide');
+        mobilePanel.style.transform = 'translateX(100%)';
+      }
+    } else {
+      console.log('Mobile panel not found!');
+    }
+    
+    // Release the block after animation completes
+    setTimeout(() => {
+      setIsMenuTransitioning(false);
+    }, 350); // Slightly longer than animation duration (300ms)
   };
 
   // Function to toggle the technical submenu in mobile view
@@ -849,22 +921,56 @@ function App() {
       e.preventDefault();
       e.stopPropagation();
     }
-    console.log('Toggling technical submenu');
-    setMobileSubmenuOpen(!mobileSubmenuOpen);
+    console.log('Toggling technical submenu, current state:', mobileSubmenuOpen);
+    const newSubmenuState = !mobileSubmenuOpen;
+    setMobileSubmenuOpen(newSubmenuState);
+    
+    // Apply fix
+    fixTechnicalSubmenu(newSubmenuState);
+    
+    // Direct manipulation of DOM as fallback
+    setTimeout(() => {
+      const submenu = document.querySelector('.mobile-submenu');
+      if (submenu) {
+        if (!mobileSubmenuOpen) {
+          submenu.classList.add('visible');
+          submenu.classList.remove('hidden');
+          console.log('Technical submenu visible');
+        } else {
+          submenu.classList.add('hidden');
+          submenu.classList.remove('visible');
+          console.log('Technical submenu hidden');
+        }
+      } else {
+        console.log('Technical submenu element not found');
+      }
+    }, 10);
   };
 
   const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
     if (section) {
-      window.scrollTo({
-        top: section.offsetTop - 80,
-        behavior: 'smooth'
-      });
-      setActiveSection(sectionId);
-      
-      // Don't automatically close the mobile menu when changing sections
-      // This allows users to navigate between sections while keeping the menu open
-      // The menu can still be closed explicitly with the X button
+      // Ensure menu is closed before scroll animation starts
+      if (mobileMenuOpen) {
+        // First close menu with short timeout to allow state update
+        setMobileMenuOpen(false);
+        
+        // Then scroll after a short delay to ensure menu animation completes
+        setTimeout(() => {
+          window.scrollTo({
+            top: section.offsetTop - 80,
+            behavior: 'smooth'
+          });
+          setActiveSection(sectionId);
+        }, 350); // Match the menu animation duration
+      } else {
+        // If menu is already closed, scroll immediately
+        window.scrollTo({
+          top: section.offsetTop - 80,
+          behavior: 'smooth'
+        });
+        setActiveSection(sectionId);
+      }
     }
   };
 
@@ -931,6 +1037,31 @@ function App() {
 
   return (
     <div className="bg-gradient-to-b from-black via-[#27282c] to-[#27282c] text-gray-100 min-h-screen relative">
+      {/* Add MobileMenuFallback for emergency fixes */}
+      <MobileMenuFallback />
+      
+      {/* Standalone Mobile Menu Button */}
+      <button 
+        className="md:hidden text-gray-300 focus:outline-none fixed top-5 right-4 z-[9999] mobile-menu-button" 
+        onClick={toggleMobileMenu}
+        aria-label="Menu Toggle"
+        style={{ 
+          background: 'rgba(20, 20, 25, 0.9)',
+          backdropFilter: 'blur(8px)',
+          padding: '0.6rem',
+          borderRadius: '0.375rem',
+          display: activeSection === 'home' || window.innerWidth < 768 ? 'flex' : 'none',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+          border: '1px solid rgba(255,66,84,0.3)',
+          width: '42px',
+          height: '42px'
+        }}
+      >
+        {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+      
       {/* Global technical background pattern with hole effect */}
       <div className="fixed inset-0 pointer-events-none z-0 hole-effect">
         <div className="absolute inset-0 bg-circuit-pattern opacity-[0.03]"></div>
@@ -973,6 +1104,7 @@ function App() {
             {/* Logo */}
             <div className="flex items-center">
               <img 
+                id="headerLogo"
                 src={`${process.env.PUBLIC_URL}/logo_sadece.png`} 
                 alt="Voltaris Logo"
                 width="40"
@@ -980,7 +1112,22 @@ function App() {
                 loading="eager"
                 className="h-8 w-8 md:h-10 md:w-10 mr-2 md:mr-3 hover:rotate-180 transition-all duration-1000 hover:scale-125" 
               />
-              <span className="text-lg md:text-xl font-semibold tracking-wide">VOLTARIS</span>
+              <span 
+                className="text-lg md:text-xl font-semibold tracking-wide cursor-pointer"
+                onClick={() => {
+                  const logo = document.getElementById('headerLogo');
+                  if (logo) {
+                    // Remove any existing animation classes
+                    logo.classList.remove('logo-wheel-spin');
+                    
+                    // Force a reflow to restart animation
+                    void logo.offsetWidth;
+                    
+                    // Add the wheel spin animation class
+                    logo.classList.add('logo-wheel-spin');
+                  }
+                }}
+              >VOLTARIS</span>
             </div>
           </div>
 
@@ -1034,39 +1181,99 @@ function App() {
           </nav>
 
           {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-gray-300 focus:outline-none z-50" 
-            onClick={toggleMobileMenu}
-            aria-label="Menu Toggle"
-          >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          {/* Remove this button since we already have one at the root level */}
         </div>
 
         {/* Mobile Navigation - Sliding Panel */}
         <div 
-          className={`md:hidden fixed inset-y-0 right-0 w-full max-w-xs z-40 bg-black/95 backdrop-blur-lg shadow-xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`} 
-          style={mobileSlideStyles}
+          className={`fixed inset-y-0 right-0 z-50 transform transition-all duration-300 mobile-menu-panel ${mobileMenuOpen ? 'translate-x-0 show' : 'translate-x-full hide'}`}
+          style={{
+            position: 'fixed',
+            top: 0,
+            bottom: 0,
+            right: 0,
+            width: '85vw',
+            maxWidth: '300px',
+            zIndex: 9999,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            willChange: 'transform',
+            borderLeft: '1px solid rgba(75, 75, 75, 0.3)',
+            visibility: 'visible',
+            display: mobileMenuOpen ? 'flex' : 'none',
+            opacity: 1,
+            flexDirection: 'column',
+            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            backdropFilter: 'blur(12px)'
+          }}
         >
-          <div className="pt-20 pb-6 px-5 flex flex-col h-full overflow-y-auto">
-            <div className="space-y-1">
+          <div className="pt-20 pb-6 px-4 flex flex-col h-full overflow-y-auto menu-content"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              visibility: 'visible',
+              opacity: 1,
+              position: 'relative',
+              zIndex: 10000,
+              width: '100%',
+              paddingTop: '5rem',
+              paddingBottom: '1.5rem'
+            }}>
+            {/* Close button at top of mobile menu */}
+            <button
+              className="absolute top-4 right-4 p-2 rounded-full bg-gray-800/50 text-gray-400 hover:text-white"
+              onClick={toggleMobileMenu}
+              aria-label="Close Menu"
+            >
+              <X size={18} />
+            </button>
+            
+            {/* Logo in menu */}
+            <div className="flex items-center absolute top-6 left-4">
+              <img 
+                src={`${process.env.PUBLIC_URL}/logo_sadece.png`} 
+                alt="Voltaris Logo"
+                width="32"
+                height="32"
+                className="h-7 w-7 mr-2" 
+              />
+              <span className="text-base font-semibold tracking-wide text-white">VOLTARIS</span>
+            </div>
+            
+            {/* Menu items */}
+            <div className="space-y-2 mt-2 menu-items-container" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>
               {['home', 'about', 'technical', 'sponsors', 'contact'].map((section) => (
                 <div key={section}>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (section === 'technical') {
-                        toggleTechnicalSubmenu(e);
-                      } else {
-                        scrollToSection(section);
-                        setMobileMenuOpen(false);
-                      }
-                    }}
-                    className={`text-sm uppercase tracking-wider py-3 font-medium px-3 rounded w-full text-left flex items-center justify-between
-                      ${activeSection === section || (section === 'technical' && (activeSection === 'vehicle' || activeSection === 'adas')) 
-                        ? 'bg-gradient-to-r from-red-900/30 to-black text-red-400 border-l-2 border-red-500' 
-                        : 'text-gray-400 hover:text-white'
-                      }`}
+                  onClick={(e) => {
+                  e.stopPropagation();
+                  if (section === 'technical') {
+                  toggleTechnicalSubmenu(e);
+                  } else {
+                  scrollToSection(section);
+                  }
+                  }}
+                  className={`text-sm uppercase tracking-wider py-3.5 font-medium px-4 rounded-md w-full text-left flex items-center justify-between mb-1.5 menu-item
+                  ${activeSection === section || (section === 'technical' && (activeSection === 'vehicle' || activeSection === 'adas')) 
+                  ? 'bg-gradient-to-r from-red-900/30 to-black text-red-400 border-l-2 border-red-500' 
+                  : 'text-gray-300 hover:text-white bg-black/20 hover:bg-black/40'
+                  }`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    visibility: 'visible',
+                    opacity: 1,
+                    width: '100%',
+                    marginBottom: '0.75rem',
+                    borderRadius: '0.375rem',
+                    padding: '0.875rem 1rem',
+                    textAlign: 'left',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}
                   >
                     <span>
                       {section === 'home' ? 'Ana Sayfa' : 
@@ -1074,21 +1281,32 @@ function App() {
                        section === 'technical' ? 'Teknik Detaylar' :
                        section === 'sponsors' ? 'Sponsorluk' : 'İletişim'}
                     </span>
-                    {section === 'technical' && <ChevronDown size={14} className={`transition-transform duration-300 ${activeSection === 'technical' || activeSection === 'vehicle' || activeSection === 'adas' ? 'transform rotate-180' : ''}`} />}
+                    {section === 'technical' && <ChevronDown size={16} className={`transition-transform duration-300 ${mobileSubmenuOpen ? 'transform rotate-180' : ''}`} />}
                   </button>
                   
                   {section === 'technical' && mobileSubmenuOpen && (
-                    <div className="ml-6 mt-2 space-y-2">
+                    <div className="ml-4 mt-1 mb-3 space-y-1 border-l border-red-900/30 pl-3 mobile-submenu visible" 
+                      style={{
+                        display: 'block',
+                        visibility: 'visible',
+                        opacity: 1,
+                        marginLeft: '1rem',
+                        marginTop: '0.25rem',
+                        marginBottom: '0.75rem', 
+                        borderLeftWidth: '1px',
+                        borderLeftColor: 'rgba(239, 68, 68, 0.3)',
+                        paddingLeft: '0.75rem'
+                      }}>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           scrollToSection('technical');
                           setMobileMenuOpen(false);
                         }} 
-                        className={`text-sm py-2 px-3 block w-full text-left rounded
+                        className={`text-sm py-2.5 px-3 block w-full text-left rounded-md
                           ${activeSection === 'technical' 
                             ? 'bg-gradient-to-r from-red-900/20 to-black text-red-400 border-l border-red-500' 
-                            : 'text-gray-400 hover:text-white'
+                            : 'text-gray-300 hover:text-white bg-black/10 hover:bg-black/30'
                           }`}
                       >
                         Teknik Detaylar
@@ -1099,10 +1317,10 @@ function App() {
                           scrollToSection('vehicle');
                           setMobileMenuOpen(false);
                         }} 
-                        className={`text-sm py-2 px-3 block w-full text-left rounded
+                        className={`text-sm py-2.5 px-3 block w-full text-left rounded-md
                           ${activeSection === 'vehicle' 
                             ? 'bg-gradient-to-r from-red-900/20 to-black text-red-400 border-l border-red-500' 
-                            : 'text-gray-400 hover:text-white'
+                            : 'text-gray-300 hover:text-white bg-black/10 hover:bg-black/30'
                           }`}
                       >
                         Araç Özellikleri
@@ -1113,10 +1331,10 @@ function App() {
                           scrollToSection('adas');
                           setMobileMenuOpen(false);
                         }} 
-                        className={`text-sm py-2 px-3 block w-full text-left rounded
+                        className={`text-sm py-2.5 px-3 block w-full text-left rounded-md
                           ${activeSection === 'adas' 
                             ? 'bg-gradient-to-r from-red-900/20 to-black text-red-400 border-l border-red-500' 
-                            : 'text-gray-400 hover:text-white'
+                            : 'text-gray-300 hover:text-white bg-black/10 hover:bg-black/30'
                           }`}
                       >
                         ADAS Sistemleri
@@ -1128,33 +1346,52 @@ function App() {
             </div>
             
             {/* Mobile footer links */}
-            <div className="mt-auto pt-6 border-t border-gray-800">
-              <div className="flex justify-center space-x-5 my-4">
-                <a href="https://instagram.com/Voltaris.official" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
-                  <Instagram size={20} />
+            <div className="mt-auto pt-5 border-t border-gray-800/50">
+              <div className="flex justify-center space-x-6 my-4">
+                <a href="https://instagram.com/Voltaris.official" target="_blank" rel="noopener noreferrer" 
+                   className="text-gray-400 hover:text-white bg-gray-800/30 p-2.5 rounded-full hover:bg-gray-800/60 transition-colors">
+                  <Instagram size={18} />
                 </a>
-                <a href="https://www.linkedin.com/company/i̇yte-voltaris-teknofest-efficiency-challange/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
-                  <Linkedin size={20} />
+                <a href="https://www.linkedin.com/company/i̇yte-voltaris-teknofest-efficiency-challange/" target="_blank" rel="noopener noreferrer" 
+                   className="text-gray-400 hover:text-white bg-gray-800/30 p-2.5 rounded-full hover:bg-gray-800/60 transition-colors">
+                  <Linkedin size={18} />
                 </a>
-                <a href="mailto:info@voltaris.com" className="text-gray-400 hover:text-white">
-                  <Mail size={20} />
+                <a href="mailto:info@voltaris.com" 
+                   className="text-gray-400 hover:text-white bg-gray-800/30 p-2.5 rounded-full hover:bg-gray-800/60 transition-colors">
+                  <Mail size={18} />
                 </a>
               </div>
-              <div className="text-center text-xs text-gray-500">
+              <div className="text-center text-xs text-gray-500 mb-1">
                 © 2025 Voltaris
               </div>
             </div>
           </div>
+
+{/* Backdrop for mobile menu */}
+          {mobileMenuOpen && (
+            <div 
+              className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm mobile-menu-backdrop" 
+              onClick={(e) => {
+                // Prevent event propagation to avoid multiple event handling
+                e.stopPropagation();
+                // Only process if not in transition
+                if (!isMenuTransitioning) {
+                  toggleMobileMenu(e);
+                }
+              }}
+              style={{
+                position: 'fixed', 
+                top: 0, 
+                right: 0, 
+                bottom: 0, 
+                left: 0,
+                willChange: 'opacity',
+                transition: 'opacity 0.3s ease-in-out',
+                touchAction: 'none'
+              }}
+            ></div>
+          )}
         </div>
-        
-        {/* Backdrop for mobile menu */}
-        {mobileMenuOpen && (
-          <div 
-            className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm" 
-            onClick={toggleMobileMenu}
-            style={{position: 'fixed', top: 0, right: 0, bottom: 0, left: 0}}
-          ></div>
-        )}
       </header>
 
       {/* Hero Section */}
@@ -1177,10 +1414,10 @@ function App() {
           }}
         ></div>
         
-        {/* Technical measurement coordinates */}
+        {/* Teknik ölçüm koordinatları */}
         <div className="absolute inset-0 z-0 opacity-10 pointer-events-none overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full">
-            {/* X-axis coordinates */}
+            {/* X-ekseni koordinatları */}
             {[...Array(10)].map((_, i) => (
               <div 
                 key={`x-${i}`} 
@@ -1191,7 +1428,7 @@ function App() {
               </div>
             ))}
             
-            {/* Y-axis coordinates */}
+            {/* Y-ekseni koordinatları */}
             {[...Array(10)].map((_, i) => (
               <div 
                 key={`y-${i}`} 
@@ -1211,7 +1448,7 @@ function App() {
           <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-horizontalSweep delay-500"></div>
           <div className="absolute top-0 right-0 w-0.5 h-full bg-gradient-to-b from-transparent via-red-500 to-transparent animate-verticalSweep delay-500"></div>
           
-          {/* Added diagonal scan lines for technical effect */}
+          {/* Teknik efekt için köşegen tarama çizgileri eklendi */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
             <div 
               className="absolute top-0 left-0 w-[150vw] h-px bg-blue-500/20 origin-top-left animate-diagonalScan"
@@ -1292,63 +1529,179 @@ function App() {
             <div className="h-1 w-16 sm:w-20 bg-red-500 mx-auto"></div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 items-center">
-            <div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-4 text-red-500">Voltaris Elektromobil Takımı</h3>
-              <p className="text-gray-300 mb-4 text-sm sm:text-base">
-                Voltaris, İzmir Yüksek Teknoloji Enstitüsü'nde elektrikli araçlar ve sürdürülebilir ulaşım teknolojileri alanında yenilikçi çözümler geliştiren bir öğrenci takımıdır.
-              </p>
-              <p className="text-gray-300 mb-4 text-sm sm:text-base">
-                2024 Mayıs tarihinde Prof. Dr. Erdal Çetkin danışmanlığında kurulan ekibimiz, İYTE'de bir kültür oluşturma amacıyla çıktığımız bu yolda, Teknofest Efficiency Challenge yarışmasının ilk akla gelen takımlarından olma ve teorik bilgilerimizi pratiğe dönüştürerek yarışmada tecrübe kazanma amacıyla çalışmalarımızı sürdürmeketeyiz.
-              </p>
-              <div className="bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 border border-gray-800 rounded-lg mt-5 sm:mt-6">
-                <h4 className="font-bold mb-2 text-blue-500 text-sm sm:text-base">Misyonumuz</h4>
-                <p className="text-xs sm:text-sm text-gray-400">
-                  Mühendislik bilgimizi ve yaratıcılığımızı kullanarak, çevreye duyarlı ve enerji tasarrufu sağlayan yenilikçi elektrikli araçlar üretmektir. Bu süreçte sadece araç geliştirmekle kalmıyoruz; aynı zamanda yenilikçi enerji yönetimi sistemleri, daha verimli batarya çözümleri ve modern sürüş teknolojileri üzerine çalışmalar yapıyoruz.
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8 items-start">
+          <div>
+          <h3 className="text-xl font-bold mb-3 text-red-500 flex items-center">
+          <span className="inline-block w-1.5 h-6 bg-gradient-to-b from-red-500 to-transparent mr-2"></span>
+          Voltaris Elektromobil Takımı
+          </h3>
+          <p className="text-gray-300 mb-3 text-sm leading-relaxed">
+          Voltaris, İzmir Yüksek Teknoloji Enstitüsü'nde elektrikli araçlar ve sürdürülebilir ulaşım teknolojileri alanında yenilikçi çözümler geliştiren bir öğrenci takımıdır.
+          </p>
+          <p className="text-gray-300 mb-3 text-sm leading-relaxed">
+          2024 Mayıs tarihinde Prof. Dr. Erdal Çetkin danışmanlığında kurulan ekibimiz, İYTE'de bir kültür oluşturma amacıyla çıktığımız bu yolda, Teknofest Efficiency Challenge yarışmasının ilk akla gelen takımlarından olma ve teorik bilgilerimizi pratiğe dönüştürerek yarışmada tecrübe kazanma amacıyla çalışmalarımızı sürdürmeketeyiz.
+          </p>
+          <div className="bg-gradient-to-br from-gray-900/70 via-black/60 to-gray-900/70 backdrop-blur-md p-3 border border-blue-900/30 rounded-lg mt-4 relative overflow-hidden group hover:border-blue-500/40 transition-all duration-300 shadow-lg">
+          {/* Mission background animation */}
+          <div className="absolute inset-0 bg-circuit-pattern opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-300"></div>
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
+          <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-blue-500 to-transparent opacity-50"></div>
+          
+          {/* Circling animation light */}
+          <div className="absolute top-0 left-0 w-1 h-1 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50 animate-circleTopLeft"></div>
+          
+          <h4 className="font-bold mb-2 text-blue-400 text-base relative z-10 flex items-center">
+          <span className="mr-2 text-blue-500">◈</span> Misyonumuz
+          </h4>
+          <div className="space-y-2">
+          <p className="text-sm text-gray-300 relative z-10 pl-3 border-l border-blue-900/50 leading-relaxed">
+          Mühendislik bilgimizi ve yaratıcılığımızı kullanarak, çevreye duyarlı ve enerji tasarrufu sağlayan yenilikçi elektrikli araçlar üretmektir. Bu süreçte sadece araç geliştirmekle kalmıyoruz; aynı zamanda yenilikçi enerji yönetimi sistemleri, verimli batarya çözümleri ve modern sürüş teknolojileri üzerine çalışmalar yapıyoruz.
+          </p>
+          </div>
+          
+          {/* Code-like blinking cursor */}
+          <div className="w-1.5 h-4 bg-blue-500/70 animate-blink absolute bottom-3 right-3"></div>
+          </div>
+          
+          {/* Sponsorship direct button */}
+          <button
+            onClick={() => scrollToSection('sponsors')}
+            className="mt-4 group relative inline-flex items-center justify-center px-4 py-2 overflow-hidden font-medium text-white transition-all duration-300 ease-out border-2 border-red-500 rounded-md bg-gradient-to-r from-red-600/90 to-red-700/90 hover:from-red-600 hover:to-red-700"
+          >
+          <span className="relative flex items-center gap-2 z-10">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/90"></span>
+              Sponsorluk
+            <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+          </span>
+          <span className="absolute -right-full -bottom-full h-40 w-40 rounded-full blur-md bg-red-500/20 transition-all duration-500 group-hover:scale-110"></span>
+          </button>
+          </div>
+          
+          <div className="bg-gradient-to-br from-[#1c1d20]/90 via-black/80 to-[#1c1d20]/90 backdrop-blur-md p-4 rounded-xl border border-gray-800/50 shadow-lg hover:shadow-blue-900/5 transition-all duration-300 relative overflow-hidden h-full">
+            <div className="absolute inset-0 bg-circuit-pattern opacity-[0.03]"></div>
+            
+            {/* Tech lines animation in background */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent absolute top-0 animate-scanLine"></div>
+            <div className="h-full w-0.5 bg-gradient-to-b from-transparent via-red-500/20 to-transparent absolute right-0 animate-scanVertical"></div>
+          </div>
+          
+          <h3 className="text-lg font-bold mb-4 text-blue-400 flex items-center relative z-10">
+            <span className="text-blue-500 mr-2"><BarChart size={18} /></span>
+            Takım İstatistikleri
+            <span className="ml-2 text-xs font-mono text-gray-500">[v2.4]</span>
+          </h3>
+          
+          <div className="space-y-3 relative z-10">
+            {/* Team member stat */}
+            <div className="bg-black/40 rounded-lg p-3 border border-gray-800/50 hover:border-blue-900/50 transition-all group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-blue-900/30 text-blue-500">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <span className="text-gray-300 text-sm">Takım Üyeleri</span>
+          </div>
+          <div className="bg-blue-900/20 rounded-full px-2 py-0.5 text-blue-400 font-mono text-sm flex items-center justify-center min-w-[32px]">
+          24
+          </div>
+          </div>
+          <div className="h-1.5 bg-gray-800/60 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 w-7/12 animate-pulse-slow rounded-full"></div>
+            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full absolute -mt-1.5 ml-[calc(58.333%-3px)] shadow-md shadow-blue-500/30"></div>
+          </div>
+          <div className="mt-1 flex justify-between text-[10px] text-gray-500">
+          <span>0</span>
+            <span>Mühendislik, Tasarım, Yönetim</span>
+            <span>30</span>
+          </div>
+          </div>
+          
+          {/* Competition stat */}
+          <div className="bg-black/40 rounded-lg p-3 border border-gray-800/50 hover:border-red-900/50 transition-all group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-red-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-red-900/30 text-red-500">
+                <Activity size={16} />
             </div>
-            <div className="bg-[#1c1d20]/70 p-4 sm:p-6 rounded-lg border border-gray-700">
-              <h3 className="text-lg sm:text-xl font-bold mb-4 text-blue-500">Takım İstatistikleri</h3>
-              <div className="space-y-3 sm:space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-400 text-sm">Takım Üyesi</span>
-                    <span className="text-white font-bold">24</span>
-                  </div>
-                  <div className="h-1.5 sm:h-2 bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 w-7/12"></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-400 text-sm">Hedef Yarışma</span>
-                    <span className="text-white font-bold">1</span>
-                  </div>
-                  <div className="h-1.5 sm:h-2 bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-500 w-4/12"></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-400 text-sm">Prototip Aşaması</span>
-                    <span className="text-white font-bold">%35</span>
-                  </div>
-                  <div className="h-1.5 sm:h-2 bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-500 w-4/12"></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-400 text-sm">Ana Departman</span>
-                    <span className="text-white font-bold">2</span>
-                  </div>
-                  <div className="h-1.5 sm:h-2 bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-yellow-500 w-5/12"></div>
-                  </div>
-                </div>
-              </div>
+          <span className="text-gray-300 text-sm">Teknofest Yarışması</span>
+          </div>
+          <div className="bg-red-900/20 rounded-full px-2 py-0.5 text-red-400 font-mono text-sm flex items-center justify-center min-w-[32px]">
+          1
+          </div>
+          </div>
+          <div className="h-1.5 bg-gray-800/60 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-red-600 to-red-400 w-4/12 rounded-full">
+              <div className="h-full w-full bg-red-500 animate-pulse-slow"></div>
             </div>
+          <div className="w-1.5 h-1.5 bg-red-400 rounded-full absolute -mt-1.5 ml-[calc(33.333%-3px)] shadow-md shadow-red-500/30"></div>
+          </div>
+          <div className="mt-1 flex justify-between text-[10px] text-gray-500">
+          <span>0</span>
+            <span>Efficiency Challenge 2025</span>
+            <span>1</span>
+          </div>
+          </div>
+          
+          {/* Prototype stage */}
+          <div className="bg-black/40 rounded-lg p-3 border border-gray-800/50 hover:border-purple-900/50 transition-all group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-purple-900/30 text-purple-500">
+                <Zap size={16} />
+            </div>
+          <span className="text-gray-300 text-sm">Prototip Aşaması</span>
+          </div>
+          <div className="bg-purple-900/20 rounded-full px-2 py-0.5 text-purple-400 font-mono text-sm flex items-center justify-center min-w-[32px]">
+          %35
+          </div>
+          </div>
+          <div className="h-1.5 bg-gray-800/60 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-purple-600 to-purple-400 w-4/12 animate-pulse-slow rounded-full"></div>
+            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full absolute -mt-1.5 ml-[calc(33.333%-3px)] shadow-md shadow-purple-500/30"></div>
+          </div>
+          <div className="mt-1 flex justify-between text-[10px] text-gray-500">
+          <span>0%</span>
+            <span>Tasarım, Üretim, Test</span>
+            <span>100%</span>
+          </div>
+          </div>
+          
+          {/* Departments */}
+          <div className="bg-black/40 rounded-lg p-3 border border-gray-800/50 hover:border-yellow-900/50 transition-all group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-yellow-900/30 text-yellow-500">
+                <CircuitBoard size={16} />
+            </div>
+          <span className="text-gray-300 text-sm">Ana Departmanlar</span>
+          </div>
+          <div className="bg-yellow-900/20 rounded-full px-2 py-0.5 text-yellow-400 font-mono text-sm flex items-center justify-center min-w-[32px]">
+          2
+          </div>
+          </div>
+          <div className="h-1.5 bg-gray-800/60 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 w-5/12 animate-pulse-slow rounded-full"></div>
+            <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full absolute -mt-1.5 ml-[calc(41.666%-3px)] shadow-md shadow-yellow-500/30"></div>
+          </div>
+          <div className="mt-1 flex justify-between text-[10px] text-gray-500">
+          <span>0</span>
+            <span>Elektrik-Elektronik & Mekanik</span>
+            <span>5</span>
+          </div>
+          </div>
+
+          {/* Code-like corner decorations */}
+          <div className="absolute top-1 right-2 text-blue-500/50 font-mono text-[9px]">{'<stats/>'}</div>
+            <div className="absolute bottom-1 left-2 text-blue-500/50 font-mono text-[9px]">{'</data>'}</div>
+          </div>
+          </div>
           </div>
           
           {/* Team Members Section */}
@@ -1664,61 +2017,206 @@ function App() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-12">
-            <AdasFeatureCard 
-              title="Şerit Takip Sistemi" 
-              description="Kamera verilerini işlemek için tasarlanan algoritma, şeritleri tespit edecek ve sürücüye sesli ve görsel uyarılar verecektir."
-              icon={<GitMerge size={24} />}
-              color="red"
-              imageUrl={`${process.env.PUBLIC_URL}/images/lane-keeping.jpg`}
-            />
+            <div className="bg-gradient-to-br from-red-900/30 via-black to-red-900/20 p-6 rounded-lg border border-red-900/30 hover:border-red-500/40 transition-all duration-300 shadow-lg hover:shadow-red-500/20">
+              <div className="flex items-center mb-4">
+                <div className="text-red-500 mr-3">
+                  <GitMerge size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-red-400">Şerit Takip Sistemi</h3>
+              </div>
+              <div className="latex-style-box bg-black/40 p-4 rounded-lg border border-red-900/30">
+                <div className="text-white math-formula red-formula academic-formula">
+                  <div className="formula-heading">Şerit Tespit Algoritması</div>
+                  <div className="formula-content">
+                    <p>Perspektif Dönüşümü: M = <span className="matrix-notation">T<sub>src→dst</sub></span></p>
+                    <p>Polinom Modeli: f(x) = ax<sup>2</sup> + bx + c</p>
+                    <p>Ağırlıklı Filtre: W<sub>i</sub> = [0.4, 0.2, 0.15, 0.1, 0.075, 0.05, 0.025]</p>
+                    <p>Kalibrasyon Faktörü: 0.0293 m/piksel</p>
+                  </div>
+                  <div className="formula-parameters">Performans: 23 FPS | Doğruluk: %95.7</div>
+                </div>
+                <p className="text-gray-300 mt-3">
+                  Kamera görüntüsünden Canny edge detection ve Hough transform kullanarak şeritleri tespit eder. Sonuç olarak sürücüye sesli ve görsel uyarılar verilir.
+                </p>
+              </div>
+            </div>
             
-            <AdasFeatureCard 
-              title="Trafik İşareti Tanıma" 
-              description="Yapay zeka tabanlı görüntü işleme algoritması ile trafik işaretlerini tanıyacak ve sürücüyü bilgilendirecektir."
-              icon={<AlertTriangle size={24} />}
-              color="blue"
-              imageUrl={`${process.env.PUBLIC_URL}/images/traffic-sign.jpg`}
-            />
+            <div className="bg-gradient-to-br from-blue-900/30 via-black to-blue-900/20 p-6 rounded-lg border border-blue-900/30 hover:border-blue-500/40 transition-all duration-300 shadow-lg hover:shadow-blue-500/20">
+              <div className="flex items-center mb-4">
+                <div className="text-blue-500 mr-3">
+                  <AlertTriangle size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-blue-400">Trafik İşareti Tanıma</h3>
+              </div>
+              <div className="latex-style-box bg-black/40 p-4 rounded-lg border border-blue-900/30">
+                <div className="text-white math-formula blue-formula academic-formula">
+                  <div className="formula-heading">YOLOv5s CNN Mimarisi</div>
+                  <div className="formula-content">
+                    <p>Omurga: CSPDarknet53 | Özellik Çıkarıcı: PANet</p>
+                    <p>Giriş Formatı: 640×640 px | Format: float16/32</p>
+                    <p>Güven Eşiği: τ = 0.5</p>
+                    <p>NMS Algoritması: IoU<sub>threshold</sub> = 0.45</p>
+                  </div>
+                  <div className="formula-parameters">Doğruluk: %91.75 | Çıkarım: 15-20ms | Sınıflar: 61</div>
+                </div>
+                <p className="text-gray-300 mt-3">
+                  YOLOv5s tabanlı derin öğrenme modeli ile trafik işaretlerini gerçek zamanlı olarak tanır ve sürücüye bilgilendirici uyarılar verir.
+                </p>
+              </div>
+            </div>
             
-            <AdasFeatureCard 
-              title="Akıllı Hız Sabitleyici" 
-              description="PID kontrol algoritması geliştirilerek hızı sabitleyecek ve enerji optimizasyonu sağlayacaktır."
-              icon={<Cpu size={24} />}
-              color="red"
-              imageUrl={`${process.env.PUBLIC_URL}/images/cruise-control.jpg`}
-            />
+            <div className="bg-gradient-to-br from-red-900/30 via-black to-red-900/20 p-6 rounded-lg border border-red-900/30 hover:border-red-500/40 transition-all duration-300 shadow-lg hover:shadow-red-500/20">
+              <div className="flex items-center mb-4">
+                <div className="text-red-500 mr-3">
+                  <Cpu size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-red-400">Akıllı Hız Sabitleyici</h3>
+              </div>
+              <div className="latex-style-box bg-black/40 p-4 rounded-lg border border-red-900/30">
+                <div className="text-white math-formula red-formula text-center pid-formula academic-formula">
+                  <div className="formula-heading">PID Kontrolcü Denklemi</div>
+                  <div className="formula-content formula-pid">
+                    u(t) = K<sub>p</sub>e(t) + K<sub>i</sub> ∫<sub>0</sub><sup>t</sup> e(τ) dτ + K<sub>d</sub> ∂e(t)/∂t
+                    <div className="pid-params">K<sub>p</sub> = 3.5, K<sub>i</sub> = 0.2, K<sub>d</sub> = 0.8</div>
+                  </div>
+                  <div className="formula-parameters">Frekans: 1kHz | PWM Aralığı: 0-1023 | I<sub>limit</sub>: ±25</div>
+                </div>
+                <p className="text-gray-300 mt-3">
+                  Optimize edilmiş PID kontrol algoritması ile hız sabitlenir, enerji verimliliği maksimize edilir ve sürüş konforu artırılır.
+                </p>
+              </div>
+            </div>
             
-            <AdasFeatureCard 
-              title="Kör Nokta Algılama" 
-              description="Ultrasonik ve kızılötesi sensörler ile kör noktalardaki engelleri tespit etmek için geliştirilen sistem."
-              icon={<Camera size={24} />}
-              color="blue"
-              imageUrl={`${process.env.PUBLIC_URL}/images/blind-spot.jpg`}
-            />
+            <div className="bg-gradient-to-br from-blue-900/30 via-black to-blue-900/20 p-6 rounded-lg border border-blue-900/30 hover:border-blue-500/40 transition-all duration-300 shadow-lg hover:shadow-blue-500/20">
+              <div className="flex items-center mb-4">
+                <div className="text-blue-500 mr-3">
+                  <Camera size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-blue-400">Kör Nokta Algılama</h3>
+              </div>
+              <div className="latex-style-box bg-black/40 p-4 rounded-lg border border-blue-900/30">
+                <div className="text-white math-formula blue-formula academic-formula">
+                  <div className="formula-heading">Radar Tabanlı Tespit Sistemi</div>
+                  <div className="formula-content">
+                    <p>Model: RD-03D Çoklu Nesne Algılama Radarı</p>
+                    <p>Algılama Mesafesi: 0.5 - 3m</p>
+                    <p>Açısal Alan: θ = ±30°</p>
+                    <p>Parametreler: Konum (x,y), Hız (v), Mesafe (d)</p>
+                  </div>
+                  <div className="formula-parameters">Yenileme Hızı: 50Hz | Montaj Konumu: Arka</div>
+                </div>
+                <p className="text-gray-300 mt-3">
+                  Ultrasonik ve kızılötesi sensörler ile kör noktalardaki engeller tespit edilir ve sürücüye uyarı verilir.
+                </p>
+              </div>
+            </div>
           </div>
           
-          <div className="overflow-x-auto">
-            <AdasSystemArchitecture />
+          <div className="mt-8 mb-10">
+            {/* Using React state for more reliable and reactive toggling */}
+            <ExpandableSection 
+              title="ADAS Sistem Mimarisi" 
+              color="purple"
+              id="adasArchitecture"
+            >
+              <div className="animate-fadeIn">
+                <AdasSystemArchitecture />
+              </div>
+            </ExpandableSection>
           </div>
           
-          <div className="mt-12 overflow-x-auto">
-            <h3 className="text-xl sm:text-2xl font-bold mb-6 text-center">Şerit Takip Sistemi</h3>
-            <LaneDetectionDiagram />
-          </div>
-          
-          <div className="mt-12 overflow-x-auto">
-            <h3 className="text-xl sm:text-2xl font-bold mb-6 text-center">Trafik İşareti Tanıma</h3>
-            <TrafficSignDetectionDiagram />
-          </div>
-          
-          <div className="mt-12 overflow-x-auto">
-            <h3 className="text-xl sm:text-2xl font-bold mb-6 text-center">Kör Nokta Tespit Sistemi</h3>
-            <BlindSpotDetectionDiagram />
-          </div>
-          
-          <div className="mt-12 overflow-x-auto">
-            <h3 className="text-xl sm:text-2xl font-bold mb-6 text-center">Akıllı Hız Sabitleyici</h3>
-            <CruiseControlSystemDiagram />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            {/* Lane Detection System */}
+            <div className="bg-gradient-to-r from-red-900/30 via-black to-red-900/30 p-4 rounded-lg border border-red-500/30 hover:border-red-500/50 transition-all duration-300 shadow-lg collapsible-diagram-container relative overflow-hidden group">
+              <div 
+                className="flex items-center justify-between cursor-pointer" 
+                onClick={() => {
+                  const element = document.getElementById('laneDetectionContent');
+                  if (element) {
+                    element.classList.toggle('hidden');
+                    document.getElementById('laneDetectionIcon')?.classList.toggle('rotate-180');
+                  }
+                }}
+              >
+                <h3 className="text-xl font-bold text-red-400">Şerit Takip Sistemi</h3>
+                <ChevronDown id="laneDetectionIcon" className="text-red-400 transition-transform duration-300" />
+              </div>
+              <div id="laneDetectionContent" className="hidden mt-4 overflow-x-auto">
+                <div className="animate-slideInUp">
+                  <LaneDetectionDiagram />
+                </div>
+              </div>
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-red-500/5 rounded-full filter blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            </div>
+            
+            {/* Traffic Sign Detection */}
+            <div className="bg-gradient-to-r from-blue-900/30 via-black to-blue-900/30 p-4 rounded-lg border border-blue-500/30 hover:border-blue-500/50 transition-all duration-300 shadow-lg collapsible-diagram-container relative overflow-hidden group">
+              <div 
+                className="flex items-center justify-between cursor-pointer" 
+                onClick={() => {
+                  const element = document.getElementById('trafficSignContent');
+                  if (element) {
+                    element.classList.toggle('hidden');
+                    document.getElementById('trafficSignIcon')?.classList.toggle('rotate-180');
+                  }
+                }}
+              >
+                <h3 className="text-xl font-bold text-blue-400">Trafik İşareti Tanıma</h3>
+                <ChevronDown id="trafficSignIcon" className="text-blue-400 transition-transform duration-300" />
+              </div>
+              <div id="trafficSignContent" className="hidden mt-4 overflow-x-auto">
+                <div className="animate-slideInUp">
+                  <TrafficSignDetectionDiagram />
+                </div>
+              </div>
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/5 rounded-full filter blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            </div>
+            
+            {/* Blind Spot Detection */}
+            <div className="bg-gradient-to-r from-green-900/30 via-black to-green-900/30 p-4 rounded-lg border border-green-500/30 hover:border-green-500/50 transition-all duration-300 shadow-lg collapsible-diagram-container relative overflow-hidden group">
+              <div 
+                className="flex items-center justify-between cursor-pointer" 
+                onClick={() => {
+                  const element = document.getElementById('blindSpotContent');
+                  if (element) {
+                    element.classList.toggle('hidden');
+                    document.getElementById('blindSpotIcon')?.classList.toggle('rotate-180');
+                  }
+                }}
+              >
+                <h3 className="text-xl font-bold text-green-400">Kör Nokta Tespit Sistemi</h3>
+                <ChevronDown id="blindSpotIcon" className="text-green-400 transition-transform duration-300" />
+              </div>
+              <div id="blindSpotContent" className="hidden mt-4 overflow-x-auto">
+                <div className="animate-slideInUp">
+                  <BlindSpotDetectionDiagram />
+                </div>
+              </div>
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-green-500/5 rounded-full filter blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            </div>
+            
+            {/* Cruise Control System */}
+            <div className="bg-gradient-to-r from-yellow-900/30 via-black to-yellow-900/30 p-4 rounded-lg border border-yellow-500/30 hover:border-yellow-500/50 transition-all duration-300 shadow-lg collapsible-diagram-container relative overflow-hidden group">
+              <div 
+                className="flex items-center justify-between cursor-pointer" 
+                onClick={() => {
+                  const element = document.getElementById('cruiseControlContent');
+                  if (element) {
+                    element.classList.toggle('hidden');
+                    document.getElementById('cruiseControlIcon')?.classList.toggle('rotate-180');
+                  }
+                }}
+              >
+                <h3 className="text-xl font-bold text-yellow-400">Akıllı Hız Sabitleyici</h3>
+                <ChevronDown id="cruiseControlIcon" className="text-yellow-400 transition-transform duration-300" />
+              </div>
+              <div id="cruiseControlContent" className="hidden mt-4 overflow-x-auto">
+                <div className="animate-slideInUp">
+                  <CruiseControlSystemDiagram />
+                </div>
+              </div>
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-yellow-500/5 rounded-full filter blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -1735,27 +2233,37 @@ function App() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 md:mb-12">
-            <div className="bg-[#1c1d20]/70 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-yellow-600/30 hover:border-yellow-500/50 transition-all duration-300 transform hover:-translate-y-1 text-center group h-full">
-              <div className="text-yellow-500 font-bold text-xl sm:text-2xl mb-2">Platin</div>
-              <div className="text-white text-lg sm:text-xl mb-3 sm:mb-4">₺50,000+</div>
-              <ul className="text-left space-y-1.5 mb-4 sm:mb-6">
-                <li className="flex items-start text-xs sm:text-sm">
-                  <span className="text-yellow-500 mr-2 mt-0.5">•</span>
-                  <span className="text-gray-300">Aracın ön ve yan yüzeylerinde büyük logo</span>
-                </li>
-                <li className="flex items-start text-xs sm:text-sm">
-                  <span className="text-yellow-500 mr-2 mt-0.5">•</span>
-                  <span className="text-gray-300">Tüm medya materyallerinde öncelikli tanıtım</span>
-                </li>
-                <li className="flex items-start text-xs sm:text-sm">
-                  <span className="text-yellow-500 mr-2 mt-0.5">•</span>
-                  <span className="text-gray-300">Özel VIP etkinlik davetleri</span>
-                </li>
-              </ul>
-              <button 
-                className="w-full bg-gradient-to-r from-yellow-600 to-yellow-800 text-white px-3 sm:px-4 py-2 rounded-lg text-sm"
-                onClick={() => handleOpenSponsorshipModal('platinum')}
-              >İletişime Geç</button>
+            <div className="bg-[#1c1d20]/70 backdrop-blur-sm p-4 sm:p-6 rounded-lg transition-all duration-300 text-center group h-full platinum-sponsor-card relative overflow-hidden">
+              {/* Animated corner elements */}
+              <div className="platinum-corner-effect platinum-corner-tl"></div>
+              <div className="platinum-corner-effect platinum-corner-tr"></div>
+              <div className="platinum-corner-effect platinum-corner-bl"></div>
+              <div className="platinum-corner-effect platinum-corner-br"></div>
+              
+              <div className="absolute inset-0 bg-gradient-radial from-[#e5e4e2]/10 to-transparent opacity-30 group-hover:opacity-50 transition-all duration-500"></div>
+              <div className="platinum-shimmer absolute inset-0 opacity-20 group-hover:opacity-40 transition-all duration-500"></div>
+              <div className="relative z-10">
+                <div className="text-[#e5e4e2] font-bold mb-2 platinum-text">Platin</div>
+                <div className="text-white text-lg sm:text-xl mb-3 sm:mb-4">₺50,000+</div>
+                <ul className="text-left space-y-1.5 mb-4 sm:mb-6">
+                  <li className="flex items-start text-xs sm:text-sm">
+                    <span className="text-[#e5e4e2] mr-2 mt-0.5">•</span>
+                    <span className="text-gray-300">Aracın ön ve yan yüzeylerinde büyük logo</span>
+                  </li>
+                  <li className="flex items-start text-xs sm:text-sm">
+                    <span className="text-[#e5e4e2] mr-2 mt-0.5">•</span>
+                    <span className="text-gray-300">Tüm medya materyallerinde öncelikli tanıtım</span>
+                  </li>
+                  <li className="flex items-start text-xs sm:text-sm">
+                    <span className="text-[#e5e4e2] mr-2 mt-0.5">•</span>
+                    <span className="text-gray-300">Özel VIP etkinlik davetleri</span>
+                  </li>
+                </ul>
+                <button 
+                  className="w-full bg-gradient-to-r from-[#babac0] via-[#e5e4e2] to-[#babac0] text-gray-900 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium shadow-lg shadow-[#e5e4e2]/20 hover:shadow-[#e5e4e2]/40 transition-all duration-300"
+                  onClick={() => handleOpenSponsorshipModal('platinum')}
+                >İletişime Geç</button>
+              </div>
             </div>
             
             <div className="bg-[#1c1d20]/70 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-gray-500/30 hover:border-gray-400/50 transition-all duration-300 transform hover:-translate-y-1 text-center group h-full">
@@ -1861,46 +2369,7 @@ function App() {
               
               <div className="bg-gray-900 p-4 sm:p-6">
                 <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-blue-500">İletişime Geçin</h3>
-                <form className="space-y-3 sm:space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                      <input 
-                        type="text" 
-                        placeholder="Adınız Soyadınız" 
-                        className="w-full bg-[#1a1b1e]/70 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <input 
-                        type="email" 
-                        placeholder="E-posta Adresiniz" 
-                        className="w-full bg-[#1a1b1e]/70 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <input 
-                      type="text" 
-                      placeholder="Kurum/Şirket" 
-                      className="w-full bg-black/50 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <textarea 
-                      placeholder="Mesajınız" 
-                      rows="3"
-                      className="w-full bg-black/50 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-blue-500"
-                    ></textarea>
-                  </div>
-                  <div>
-                    <button 
-                      type="submit" 
-                      className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-5 py-2 rounded-lg hover:from-blue-500 hover:to-blue-700 transition-colors text-sm"
-                    >
-                      Gönder
-                    </button>
-                  </div>
-                </form>
+                <ContactForm />
               </div>
             </div>
           </div>
@@ -1946,21 +2415,17 @@ function App() {
               </div>
               <h3 className="text-base sm:text-lg font-bold mb-2">Sosyal Medya</h3>
               <div className="flex justify-center space-x-3 sm:space-x-4 mt-3">
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
-                  </svg>
-                </a>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                  </svg>
-                </a>
-                <a href="https://instagram.com/Voltaris.official" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fillRule="evenodd" d="M12.315 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026a9.564 9.564 0 012.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                  </svg>
-                </a>
+      
+              <a href="https://instagram.com/Voltaris.official" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">
+                <span class="sr-only">Instagram</span>
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12 2.163c3.204 0 3.584.012 4.85.07 1.172.053 1.803.248 2.228.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.168.425.361 1.055.413 2.228.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.052 1.172-.246 1.803-.413 2.228-.217.562-.477.96-.896 1.381-.42.419-.819.679-1.381.896-.425.168-1.056.361-2.228.413-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.172-.053-1.803-.248-2.228-.413-.562-.217-.96-.477-1.382-.896-.419-.42-.679-.819-.896-1.381-.168-.425-.361-1.055-.413-2.228-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.053-1.172.248-1.803.413-2.228.217-.562.477-.96.896-1.382.42-.419.819-.679 1.381-.896.425-.168 1.056-.361 2.228-.413A31.89 31.89 0 0112 2.163zm0 1.646c-3.142 0-3.496.011-4.716.067-.976.044-1.502.232-1.82.36-.347.135-.587.319-.833.566-.247.247-.431.486-.566.833-.128.318-.316.844-.36 1.82-.056 1.22-.067 1.574-.067 4.716s.011 3.496.067 4.716c.044.976.232 1.502.36 1.82.135.347.319.587.566.833.247.247.486.431.833.566.318.128.844.316 1.82.36 1.22.056 1.574.067 4.716.067s3.496-.011 4.716-.067c.976-.044 1.502-.232 1.82-.36.347-.135.587-.319.833-.566.247-.247.431-.486.566-.833.128-.318.316-.844.36-1.82.056-1.22.067-1.574.067-4.716s-.011-3.496-.067-4.716c-.044-.976-.232-1.502-.36-1.82-.135-.347-.319-.587-.566-.833-.247-.247-.486-.431-.833-.566-.318-.128-.844-.316-1.82-.36-1.22-.056-1.574-.067-4.716-.067zM12 7.168a4.832 4.832 0 100 9.664 4.832 4.832 0 000-9.664zm0 8a3.168 3.168 0 110-6.336 3.168 3.168 0 010 6.336zm4.808-8.076a1.152 1.152 0 100 2.304 1.152 1.152 0 000-2.304z" clip-rule="evenodd" />
+                </svg>
+              </a>
+
+
+
+
                 <a href="https://github.com/voltaris-official" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026a9.564 9.564 0 012.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />

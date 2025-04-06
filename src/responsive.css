@@ -1,5 +1,62 @@
 /* Advanced responsive styles with permanent tier indicators */
 
+/* Mobile menu button visibility */
+@media screen and (min-width: 768px) {
+  .mobile-menu-button {
+    display: none !important;
+  }
+}
+
+/* Mobile menu button only on home page for desktop */
+@media screen and (min-width: 768px) {
+  body:not([data-section="home"]) .mobile-menu-button {
+    display: none !important;
+  }
+}
+
+/* Add transition for smoother button hide/show */
+.mobile-menu-button {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* Additional styles for better visual experience */
+.mobile-menu-button:hover {
+  box-shadow: 0 4px 15px rgba(255, 66, 84, 0.6);
+}
+
+/* When user has scrolled, adjust button appearance */
+body[data-scrolled="true"] .mobile-menu-button {
+  background: rgba(20, 20, 25, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Fix for mobile menu in all views */
+.fixed.inset-y-0.right-0.z-50.transform {
+  width: 85vw;
+  max-width: 300px;
+}
+
+@media screen and (min-width: 768px) {
+  /* On desktop, hide the mobile menu except on home page */
+  body:not([data-section="home"]) .fixed.inset-y-0.right-0.z-50.translate-x-0 {
+    transform: translateX(100%) !important;
+  }
+}
+
+/* Additional media queries for header height adjustments */
+@media screen and (max-height: 600px) {
+  header {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Always show mobile menu button on short screens */
+  .mobile-menu-button {
+    display: flex !important;
+  }
+}
+
+
 /* Base positioning adjustments */
 [id="home"] .absolute.bottom-0.left-0.right-0.z-10.px-4 {
   transform: translateY(-30px) !important; /* Move the sponsorship bar up */

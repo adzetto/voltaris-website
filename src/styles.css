@@ -1,3 +1,76 @@
+@keyframes circleTopLeft {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(calc(100% - 4px), 0);
+  }
+  50% {
+    transform: translate(calc(100% - 4px), calc(100% - 4px));
+  }
+  75% {
+    transform: translate(0, calc(100% - 4px));
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes scanVertical {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-circleTopLeft {
+  animation: circleTopLeft 10s linear infinite;
+}
+
+.animate-blink {
+  animation: blink 1.2s step-end infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.animate-scanLine {
+  animation: scanLine 5s linear infinite;
+}
+
+.animate-scanVertical {
+  animation: scanVertical 7s linear infinite;
+}
 @keyframes logoFade {
   0% { opacity: 0; filter: blur(4px) brightness(0.7); transform: scale(0.9); }
   100% { opacity: 1; filter: blur(0) brightness(1); transform: scale(1); }
@@ -605,6 +678,12 @@
 
 .animate-scanLine {
   animation: scanLine 3s ease-out infinite;
+}
+
+/* Car wheel spin animation for logo - matches loading intro */
+.logo-wheel-spin {
+  animation: spin-loading 2.5s ease-in-out forwards;
+  transform-origin: center;
 }
 
 @keyframes fadeIn {

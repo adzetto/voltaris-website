@@ -35,8 +35,13 @@ module.exports = function override(config, env) {
             test: /[\\/]node_modules[\\/]/,
             name(module) {
               // Get the name. E.g. node_modules/packageName/not/this/part.js
-              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+              // Check if module.context exists to avoid TypeError
+              if (!module.context) return 'vendor.unknown';
+              const packageNameMatch = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
+              // If match fails, return generic vendor name
+              if (!packageNameMatch) return 'vendor.unknown';
               // Return custom chunk name
+              const packageName = packageNameMatch[1];
               return `vendor.${packageName.replace('@', '')}`;
             },
             priority: -10

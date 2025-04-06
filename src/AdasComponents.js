@@ -193,7 +193,7 @@ export const AdasFunctionDetail = ({ functionId }) => {
         "PID kontrol algoritması kullanan hız sabitleyici sistem, belirlenen hızda sabit giderek sürücü konforunu artırır ve enerji tüketimini optimize ederek menzili artırır.",
       image: getPlaceholderImage(800, 400),
       specs: [
-        { label: "Kontrol Algoritması", value: "PID (Proportional-Integral-Derivative)" },
+        { label: "Kontrol Algoritması", value: "PID (Oransal-İntegral-Türevsel)" },
         { label: "Hız Sabitleme Hassasiyeti", value: "±1 km/s" },
         { label: "Enerji Tasarrufu", value: "%5-8 arasında" },
         { label: "Aktivasyon Koşulu", value: "15 km/s üzerinde" }

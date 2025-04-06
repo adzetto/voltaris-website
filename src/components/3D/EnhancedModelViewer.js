@@ -34,41 +34,28 @@ const CAR_COLORS = {
   GREEN: new THREE.Color('#01644a')       // Racing green
 };
 
-// Advanced loading indicator component with professional styling
+// Professional technical loading indicator component
 const LoadingIndicator = ({ progress = 0 }) => {
-  // Add keyframe animations to style section
+  // Simple keyframe animations for minimal visual movement
   const animationStyles = `
-  @keyframes spin-reverse {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(-360deg);
-    }
-  }
-
-  @keyframes shine {
-    from {
-      background-position: -200px 0;
-    }
-    to {
-      background-position: 200px 0;
-    }
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
   }
   `;
 
   // Inject animation styles into component
   useEffect(() => {
     // Add the animation styles if they don't already exist
-    if (!document.getElementById('advanced-loading-animations')) {
+    if (!document.getElementById('technical-loading-animations')) {
       const styleElement = document.createElement('style');
-      styleElement.id = 'advanced-loading-animations';
+      styleElement.id = 'technical-loading-animations';
       styleElement.innerHTML = animationStyles;
       document.head.appendChild(styleElement);
       
       return () => {
         // Clean up the styles when component unmounts
-        const element = document.getElementById('advanced-loading-animations');
+        const element = document.getElementById('technical-loading-animations');
         if (element) {
           document.head.removeChild(element);
         }
@@ -78,78 +65,41 @@ const LoadingIndicator = ({ progress = 0 }) => {
 
   return (
     <Html center>
-      <div className="flex flex-col items-center justify-center bg-black/80 backdrop-blur-lg p-8 rounded-lg border border-gray-800 overflow-hidden relative">
-        {/* Technical background pattern */}
-        <div className="absolute inset-0 z-0 opacity-20 circuit-pattern"></div>
+      <div className="flex flex-col items-center justify-center bg-black/70 p-4 rounded border border-gray-700 overflow-hidden relative">
+        {/* Simple top border indicator */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-blue-500"></div>
         
-        {/* Animated scanning line effect */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 animate-horizontalSweep"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 animate-horizontalSweep"></div>
-        
-        {/* Corner decorations */}
-        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500"></div>
-        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blue-500"></div>
-        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blue-500"></div>
-        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500"></div>
-        
-        {/* Main content */}
+        {/* Main content with clean layout */}
         <div className="relative z-10 flex flex-col items-center">
-          {/* Advanced spinner with dynamic speed based on progress */}
-          <div className="relative w-24 h-24 mb-6">
-            <div className="absolute w-full h-full rounded-full border-4 border-gray-800 opacity-25"></div>
-            <div className="absolute w-full h-full rounded-full border-4 border-t-red-500 border-r-transparent border-b-blue-500 border-l-transparent animate-spin" 
-                 style={{ animationDuration: `${1.5 - Math.min(progress/200, 0.7)}s` }}></div>
-            <div className="absolute w-16 h-16 top-4 left-4 rounded-full border-4 border-t-transparent border-r-blue-500 border-b-transparent border-l-red-500 animate-spin-reverse"
-                 style={{ animationDuration: `${2 - Math.min(progress/200, 0.7)}s` }}></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-white text-xl font-bold">{Math.floor(progress)}%</span>
-            </div>
-          </div>
-          
-          {/* Pulsing title with gradient */}
-          <div className="text-center mb-6">
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent animate-pulse"
-                style={{ animationDuration: '3s' }}>
+          {/* Simple loading status title */}
+          <div className="text-center mb-3">
+            <h3 className="text-base font-mono text-blue-400 uppercase tracking-wider">
               Yükleniyor
             </h3>
-            <p className="text-gray-400 text-sm mt-1">3D Model Hazırlanıyor</p>
+            <p className="text-gray-400 text-xs mt-1 font-mono">3D Model</p>
           </div>
           
-          {/* Advanced progress bar */}
-          <div className="w-64 h-3 bg-gray-800/70 rounded-full overflow-hidden backdrop-blur-sm mt-2 mb-4 relative">
-            {/* Background pulse effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-blue-500/20 animate-pulse"></div>
-            
-            {/* Primary progress */}
-            <div className="h-full bg-gradient-to-r from-red-600 via-purple-600 to-blue-600 relative z-10 transition-all duration-300 ease-out"
-                 style={{ width: `${progress}%` }}>
-              {/* Animated shine effect */}
-              <div className="absolute inset-0 w-full animate-shine"></div>
+          {/* Clean progress indicator */}
+          <div className="mb-2 text-center">
+            <div className="inline-block h-10 w-10 border-2 border-gray-600 rounded-full flex items-center justify-center">
+              <span className="text-sm text-gray-300 font-mono">{Math.floor(progress)}%</span>
             </div>
-            
-            {/* Progress markers */}
-            {[25, 50, 75].map(marker => (
-              <div key={marker} 
-                   className={`absolute top-0 bottom-0 w-0.5 ${progress >= marker ? 'bg-white' : 'bg-gray-600'}`}
-                   style={{ left: `${marker}%`, transition: 'background-color 0.3s ease' }}></div>
-            ))}
           </div>
           
-          {/* Loading stage indicators */}
-          <div className="flex space-x-3 mt-2">
-            <div className={`w-2 h-2 rounded-full ${progress > 0 ? 'bg-red-500' : 'bg-gray-600'}`}></div>
-            <div className={`w-2 h-2 rounded-full ${progress > 33 ? 'bg-purple-500' : 'bg-gray-600'}`}></div>
-            <div className={`w-2 h-2 rounded-full ${progress > 66 ? 'bg-blue-500' : 'bg-gray-600'}`}></div>
-            <div className={`w-2 h-2 rounded-full ${progress >= 100 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
+          {/* Simple progress bar */}
+          <div className="w-48 h-1 bg-gray-800 rounded-full overflow-hidden mt-2 mb-3">
+            <div className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                 style={{ width: `${progress}%` }}>
+            </div>
           </div>
           
-          {/* Technical loading message */}
-          <div className="text-xs text-gray-400 mt-4 font-mono animate-pulse">
-            {progress < 25 && "Geometri yükleniyor..."}
-            {progress >= 25 && progress < 50 && "Doku haritaları işleniyor..."}
-            {progress >= 50 && progress < 75 && "Malzemeler hazırlanıyor..."}
-            {progress >= 75 && progress < 100 && "Aydınlatma optimize ediliyor..."}
-            {progress >= 100 && "Model hazır!"}
+          {/* Technical loading phase indicator */}
+          <div className="text-xs text-gray-400 font-mono text-center" style={{ minHeight: '1rem' }}>
+            {progress < 25 && "Geometri yükleniyor"}
+            {progress >= 25 && progress < 50 && "Doku haritaları işleniyor"}
+            {progress >= 50 && progress < 75 && "Malzemeler hazırlanıyor"}
+            {progress >= 75 && progress < 100 && "Aydınlatma optimize ediliyor"}
+            {progress >= 100 && "Model hazır"}
           </div>
         </div>
       </div>
@@ -162,13 +112,13 @@ function EnhancedPBRLighting() {
   // Reference for main light
   const keyLightRef = useRef();
   
-  // Subtle light animation
+  // Subtle light animation with safe early return
   useFrame(({ clock }) => {
-    if (keyLightRef.current) {
-      const t = clock.elapsedTime * 0.1;
-      keyLightRef.current.position.x = 5 + Math.sin(t) * 0.2;
-      keyLightRef.current.position.z = Math.cos(t) * 0.2;
-    }
+    if (!keyLightRef.current) return;
+    
+    const t = clock.elapsedTime * 0.1;
+    keyLightRef.current.position.x = 5 + Math.sin(t) * 0.2;
+    keyLightRef.current.position.z = Math.cos(t) * 0.2;
   });
   
   return (
@@ -245,6 +195,7 @@ function OptimizedCarModel() {
   // Define our primary car color - Bright red is default
   const primaryColor = CAR_COLORS.RED;
   
+  // Load model effect
   useEffect(() => {
     let isMounted = true;
     console.log("Loading optimized model...");
@@ -425,16 +376,16 @@ function OptimizedCarModel() {
   const handlePointerOver = () => setHovered(true);
   const handlePointerOut = () => setHovered(false);
 
-  // Add a subtle continuous rotation
+  // Add subtle continuous rotation with safe early return
   useFrame((state, delta) => {
-    if (groupRef.current) {
-      if (hovered) {
-        // Slower rotation when hovered
-        groupRef.current.rotation.y += delta * 0.005;
-      } else {
-        // Normal rotation speed
-        groupRef.current.rotation.y += delta * 0.01;
-      }
+    if (!groupRef.current) return;
+    
+    if (hovered) {
+      // Slower rotation when hovered
+      groupRef.current.rotation.y += delta * 0.005;
+    } else {
+      // Normal rotation speed
+      groupRef.current.rotation.y += delta * 0.01;
     }
   });
 

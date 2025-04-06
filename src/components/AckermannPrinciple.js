@@ -149,7 +149,7 @@ const AckermannDiagram = () => {
 };
 
 const AckermannPrinciple = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="bg-black/70 backdrop-blur-md rounded-lg border border-gray-800 overflow-hidden mb-8 shadow-lg transition-all duration-500">

@@ -182,7 +182,7 @@ export const AdasTechnicalDiagram = () => {
             </g>
             
             {/* Title */}
-            <text x="450" y="50" fontFamily="Arial, sans-serif" fontSize="24" fill="#ffffff" textAnchor="middle" fontWeight="bold">ADAS System Architecture</text>
+            <text x="450" y="50" fontFamily="Arial, sans-serif" fontSize="24" fill="#ffffff" textAnchor="middle" fontWeight="bold">ADAS Sistem Mimarisi</text>
             <text x="450" y="75" fontFamily="Arial, sans-serif" fontSize="16" fill="#ff4254" textAnchor="middle">Voltaris Elektromobil</text>
             
             {/* Main Raspberry Pi 5 */}
@@ -190,7 +190,7 @@ export const AdasTechnicalDiagram = () => {
               <rect x="-120" y="-60" width="240" height="120" rx="5" ry="5" fill="url(#raspberry-gradient)" stroke="#ffffff" strokeWidth="2" filter="url(#glow)" />
               <text x="0" y="0" fontFamily="Arial, sans-serif" fontSize="18" fill="#ffffff" textAnchor="middle" fontWeight="bold">Raspberry Pi 5</text>
               <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle">8GB RAM</text>
-              <text x="0" y="-25" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffcc00" textAnchor="middle">ADAS Processing Unit</text>
+              <text x="0" y="-25" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffcc00" textAnchor="middle">ADAS İşlem Birimi</text>
               
               {/* Ports visualization */}
               <rect x="-100" y="45" width="200" height="10" rx="2" fill="#333333" />
@@ -208,9 +208,9 @@ export const AdasTechnicalDiagram = () => {
             {/* USB Camera */}
             <g transform="translate(200, 170)">
               <rect x="-70" y="-40" width="140" height="80" rx="5" ry="5" fill="url(#sensor-gradient)" stroke="#ffffff" strokeWidth="2" />
-              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">USB Camera</text>
-              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">1280x960 Resolution</text>
-              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Lane Detection, Sign Detection</text>
+              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">USB Kamera</text>
+              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">1280x960 Çözünürlük</text>
+              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Şerit Tespiti, İşaret Tespiti</text>
               
               {/* Camera lens */}
               <circle cx="0" cy="-20" r="12" fill="#000000" stroke="#333333" strokeWidth="2" />
@@ -223,8 +223,8 @@ export const AdasTechnicalDiagram = () => {
             <g transform="translate(200, 300)">
               <rect x="-70" y="-40" width="140" height="80" rx="5" ry="5" fill="url(#sensor-gradient)" stroke="#ffffff" strokeWidth="2" />
               <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">RD-03D Radar</text>
-              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">Multi-Object Detection</text>
-              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Blind Spot Detection</text>
+              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">Çoklu Nesne Algılama</text>
+              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Kör Nokta Algılama</text>
               
               {/* Radar waves animation */}
               <g opacity="0.7">
@@ -243,9 +243,9 @@ export const AdasTechnicalDiagram = () => {
             {/* Light Sensor */}
             <g transform="translate(200, 430)">
               <rect x="-70" y="-40" width="140" height="80" rx="5" ry="5" fill="url(#sensor-gradient)" stroke="#ffffff" strokeWidth="2" />
-              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">BH1750 Sensor</text>
-              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">Ambient Light Sensor</text>
-              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Automatic Headlights</text>
+              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">BH1750 Sensör</text>
+              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">Ortam Işığı Sensörü</text>
+              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Otomatik Farlar</text>
               
               {/* Light sensor icon */}
               <circle cx="0" cy="-20" r="10" fill="#ffeb3b" opacity="0.8">
@@ -258,9 +258,9 @@ export const AdasTechnicalDiagram = () => {
             {/* Display Screen */}
             <g transform="translate(700, 170)">
               <rect x="-70" y="-40" width="140" height="80" rx="5" ry="5" fill="url(#screen-gradient)" stroke="#ffffff" strokeWidth="2" />
-              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">10" TFT Display</text>
-              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">HDMI Connection</text>
-              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Driver Interface</text>
+              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">10" TFT Ekran</text>
+              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">HDMI Bağlantısı</text>
+              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Sürücü Arayüzü</text>
               
               {/* Screen display */}
               <rect x="-50" y="-30" width="100" height="60" rx="2" fill="#000022" stroke="#444444" />
@@ -272,9 +272,9 @@ export const AdasTechnicalDiagram = () => {
             {/* Vehicle Control System (AKS) */}
             <g transform="translate(700, 300)">
               <rect x="-70" y="-40" width="140" height="80" rx="5" ry="5" fill="url(#arduino-gradient)" stroke="#ffffff" strokeWidth="2" />
-              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">AKS Control Unit</text>
+              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">AKS Kontrol Ünitesi</text>
               <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">STM32F407VGT6</text>
-              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Cruise Control</text>
+              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Hız Sabitleyici</text>
               
               {/* Microcontroller details */}
               <rect x="-45" y="-30" width="90" height="20" rx="2" fill="#005662" stroke="#0097a7" />
@@ -284,9 +284,9 @@ export const AdasTechnicalDiagram = () => {
             {/* Motor Controller */}
             <g transform="translate(700, 430)">
               <rect x="-70" y="-40" width="140" height="80" rx="5" ry="5" fill="url(#component-gradient)" stroke="#ffffff" strokeWidth="2" />
-              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">Motor Controller</text>
-              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">BLDC Motor Driver</text>
-              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Field Oriented Control</text>
+              <text x="0" y="-15" fontFamily="Arial, sans-serif" fontSize="14" fill="#ffffff" textAnchor="middle" fontWeight="bold">Motor Kontrolü</text>
+              <text x="0" y="5" fontFamily="Arial, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">BLDC Motor Sürücü</text>
+              <text x="0" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#aaaaaa" textAnchor="middle">Alan Yönelimli Kontrol</text>
               
               {/* Motor controller chip */}
               <rect x="-40" y="-30" width="80" height="15" rx="2" fill="#333333" stroke="#666666" />

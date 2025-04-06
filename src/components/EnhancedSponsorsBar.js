@@ -104,7 +104,7 @@ const EnhancedSponsorsBar = ({ sponsors }) => {
       </div>
       
       {/* CSS for tier indicator animations */}
-      <style jsx="true">{`
+      <style>{`
         .sponsor-bar {
           margin-bottom: 10px;
         }
