@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ChevronDown, Menu, X, 
   ChevronRight, Cpu, Terminal, Camera, 
-  GitMerge, Linkedin, Mail, Phone, Instagram, AlertTriangle
+  GitMerge, Linkedin, Mail, Phone, Instagram, AlertTriangle, Navigation, Eye, Sun, CircuitBoard, 
+  ArrowRight, BarChart, Activity, Zap, ChevronUp, PlusCircle, MinusCircle
 } from "lucide-react";
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -12,7 +13,7 @@ import { OrbitControls, Text } from '@react-three/drei';
 import TechnicalDataViz from './TechnicalDataViz';
 import SponsorshipModal from './SponsorshipModal';
 import teamData from './teamData';
-import { TeamStats } from './TeamComponents';
+import { TeamStats, SponsorShowcase } from './TeamComponents';
 import { FlowingCircuitEntryAnimation, CircuitLoadingAnimation, ProfessionalOrgChart } from './components/new';
 import AdasSystemArchitecture, { LaneDetectionDiagram, TrafficSignDetectionDiagram, CruiseControlSystemDiagram, BlindSpotDetectionDiagram } from './AdasSvgComponents';
 import TechnicalModelViewer from './components/TechnicalModelViewer';
@@ -20,6 +21,7 @@ import EnhancedSponsorsBar from './components/EnhancedSponsorsBar';
 import './styles.css';
 import { useMouseTrail, useParallax, useScrollAnimation, useTechnicalSpecsAnimation } from './hooks/useInteractive';
 import { setupOptimizers } from './utils/ModelOptimizer';
+import AckermannPrinciple from './components/AckermannPrinciple';
 
 // Initialize optimizers
 setupOptimizers();
@@ -1641,6 +1643,11 @@ function App() {
                   </div>
                 </div>
             </div>
+          </div>
+          
+          {/* Add Ackermann Principle Component */}
+          <div className="mt-8">
+            <AckermannPrinciple />
           </div>
         </div>
       </section>

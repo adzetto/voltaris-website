@@ -35,125 +35,127 @@ const CAR_COLORS = {
 };
 
 // Advanced loading indicator component with professional styling
-const LoadingIndicator = ({ progress = 0 }) => (
-  <Html center>
-    <div className="flex flex-col items-center justify-center bg-black/80 backdrop-blur-lg p-8 rounded-lg border border-gray-800 overflow-hidden relative">
-      {/* Technical background pattern */}
-      <div className="absolute inset-0 z-0 opacity-20 circuit-pattern"></div>
+const LoadingIndicator = ({ progress = 0 }) => {
+  // Add keyframe animations to style section
+  const animationStyles = `
+  @keyframes spin-reverse {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  @keyframes shine {
+    from {
+      background-position: -200px 0;
+    }
+    to {
+      background-position: 200px 0;
+    }
+  }
+  `;
+
+  // Inject animation styles into component
+  useEffect(() => {
+    // Add the animation styles if they don't already exist
+    if (!document.getElementById('advanced-loading-animations')) {
+      const styleElement = document.createElement('style');
+      styleElement.id = 'advanced-loading-animations';
+      styleElement.innerHTML = animationStyles;
+      document.head.appendChild(styleElement);
       
-      {/* Animated scanning line effect */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 animate-horizontalSweep"></div>
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 animate-horizontalSweep"></div>
-      
-      {/* Corner decorations */}
-      <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500"></div>
-      <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blue-500"></div>
-      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blue-500"></div>
-      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500"></div>
-      
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center">
-        {/* Advanced spinner with dynamic speed based on progress */}
-        <div className="relative w-24 h-24 mb-6">
-          <div className="absolute w-full h-full rounded-full border-4 border-gray-800 opacity-25"></div>
-          <div className="absolute w-full h-full rounded-full border-4 border-t-red-500 border-r-transparent border-b-blue-500 border-l-transparent animate-spin" 
-               style={{ animationDuration: `${1.5 - Math.min(progress/200, 0.7)}s` }}></div>
-          <div className="absolute w-16 h-16 top-4 left-4 rounded-full border-4 border-t-transparent border-r-blue-500 border-b-transparent border-l-red-500 animate-spin-reverse"
-               style={{ animationDuration: `${2 - Math.min(progress/200, 0.7)}s` }}></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-white text-xl font-bold">{Math.floor(progress)}%</span>
+      return () => {
+        // Clean up the styles when component unmounts
+        const element = document.getElementById('advanced-loading-animations');
+        if (element) {
+          document.head.removeChild(element);
+        }
+      };
+    }
+  }, []);
+
+  return (
+    <Html center>
+      <div className="flex flex-col items-center justify-center bg-black/80 backdrop-blur-lg p-8 rounded-lg border border-gray-800 overflow-hidden relative">
+        {/* Technical background pattern */}
+        <div className="absolute inset-0 z-0 opacity-20 circuit-pattern"></div>
+        
+        {/* Animated scanning line effect */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 animate-horizontalSweep"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 animate-horizontalSweep"></div>
+        
+        {/* Corner decorations */}
+        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500"></div>
+        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blue-500"></div>
+        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blue-500"></div>
+        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500"></div>
+        
+        {/* Main content */}
+        <div className="relative z-10 flex flex-col items-center">
+          {/* Advanced spinner with dynamic speed based on progress */}
+          <div className="relative w-24 h-24 mb-6">
+            <div className="absolute w-full h-full rounded-full border-4 border-gray-800 opacity-25"></div>
+            <div className="absolute w-full h-full rounded-full border-4 border-t-red-500 border-r-transparent border-b-blue-500 border-l-transparent animate-spin" 
+                 style={{ animationDuration: `${1.5 - Math.min(progress/200, 0.7)}s` }}></div>
+            <div className="absolute w-16 h-16 top-4 left-4 rounded-full border-4 border-t-transparent border-r-blue-500 border-b-transparent border-l-red-500 animate-spin-reverse"
+                 style={{ animationDuration: `${2 - Math.min(progress/200, 0.7)}s` }}></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white text-xl font-bold">{Math.floor(progress)}%</span>
+            </div>
           </div>
-        </div>
-        
-        {/* Pulsing title with gradient */}
-        <div className="text-center mb-6">
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent animate-pulse"
-              style={{ animationDuration: '3s' }}>
-            Yükleniyor
-          </h3>
-          <p className="text-gray-400 text-sm mt-1">3D Model Hazırlanıyor</p>
-        </div>
-        
-        {/* Advanced progress bar */}
-        <div className="w-64 h-3 bg-gray-800/70 rounded-full overflow-hidden backdrop-blur-sm mt-2 mb-4 relative">
-          {/* Background pulse effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-blue-500/20 animate-pulse"></div>
           
-          {/* Primary progress */}
-          <div className="h-full bg-gradient-to-r from-red-600 via-purple-600 to-blue-600 relative z-10 transition-all duration-300 ease-out"
-               style={{ width: `${progress}%` }}>
-            {/* Animated shine effect */}
-            <div className="absolute inset-0 w-full animate-shine"></div>
+          {/* Pulsing title with gradient */}
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent animate-pulse"
+                style={{ animationDuration: '3s' }}>
+              Yükleniyor
+            </h3>
+            <p className="text-gray-400 text-sm mt-1">3D Model Hazırlanıyor</p>
           </div>
           
-          {/* Progress markers */}
-          {[25, 50, 75].map(marker => (
-            <div key={marker} 
-                 className={`absolute top-0 bottom-0 w-0.5 ${progress >= marker ? 'bg-white' : 'bg-gray-600'}`}
-                 style={{ left: `${marker}%`, transition: 'background-color 0.3s ease' }}></div>
-          ))}
-        </div>
-        
-        {/* Loading stage indicators */}
-        <div className="flex space-x-3 mt-2">
-          <div className={`w-2 h-2 rounded-full ${progress > 0 ? 'bg-red-500' : 'bg-gray-600'}`}></div>
-          <div className={`w-2 h-2 rounded-full ${progress > 33 ? 'bg-purple-500' : 'bg-gray-600'}`}></div>
-          <div className={`w-2 h-2 rounded-full ${progress > 66 ? 'bg-blue-500' : 'bg-gray-600'}`}></div>
-          <div className={`w-2 h-2 rounded-full ${progress >= 100 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
-        </div>
-        
-        {/* Technical loading message */}
-        <div className="text-xs text-gray-400 mt-4 font-mono animate-pulse">
-          {progress < 25 && "Geometri yükleniyor..."}
-          {progress >= 25 && progress < 50 && "Doku haritaları işleniyor..."}
-          {progress >= 50 && progress < 75 && "Malzemeler hazırlanıyor..."}
-          {progress >= 75 && progress < 100 && "Aydınlatma optimize ediliyor..."}
-          {progress >= 100 && "Model hazır!"}
+          {/* Advanced progress bar */}
+          <div className="w-64 h-3 bg-gray-800/70 rounded-full overflow-hidden backdrop-blur-sm mt-2 mb-4 relative">
+            {/* Background pulse effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-blue-500/20 animate-pulse"></div>
+            
+            {/* Primary progress */}
+            <div className="h-full bg-gradient-to-r from-red-600 via-purple-600 to-blue-600 relative z-10 transition-all duration-300 ease-out"
+                 style={{ width: `${progress}%` }}>
+              {/* Animated shine effect */}
+              <div className="absolute inset-0 w-full animate-shine"></div>
+            </div>
+            
+            {/* Progress markers */}
+            {[25, 50, 75].map(marker => (
+              <div key={marker} 
+                   className={`absolute top-0 bottom-0 w-0.5 ${progress >= marker ? 'bg-white' : 'bg-gray-600'}`}
+                   style={{ left: `${marker}%`, transition: 'background-color 0.3s ease' }}></div>
+            ))}
+          </div>
+          
+          {/* Loading stage indicators */}
+          <div className="flex space-x-3 mt-2">
+            <div className={`w-2 h-2 rounded-full ${progress > 0 ? 'bg-red-500' : 'bg-gray-600'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${progress > 33 ? 'bg-purple-500' : 'bg-gray-600'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${progress > 66 ? 'bg-blue-500' : 'bg-gray-600'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${progress >= 100 ? 'bg-green-500' : 'bg-gray-600'}`}></div>
+          </div>
+          
+          {/* Technical loading message */}
+          <div className="text-xs text-gray-400 mt-4 font-mono animate-pulse">
+            {progress < 25 && "Geometri yükleniyor..."}
+            {progress >= 25 && progress < 50 && "Doku haritaları işleniyor..."}
+            {progress >= 50 && progress < 75 && "Malzemeler hazırlanıyor..."}
+            {progress >= 75 && progress < 100 && "Aydınlatma optimize ediliyor..."}
+            {progress >= 100 && "Model hazır!"}
+          </div>
         </div>
       </div>
-    </div>
-  </Html>
-);
-
-// Add keyframe animations to style section
-const animationStyles = `
-@keyframes spin-reverse {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(-360deg);
-  }
-}
-
-@keyframes shine {
-  from {
-    background-position: -200px 0;
-  }
-  to {
-    background-position: 200px 0;
-  }
-}
-`;
-
-// Inject animation styles into component
-useEffect(() => {
-  // Add the animation styles if they don't already exist
-  if (!document.getElementById('advanced-loading-animations')) {
-    const styleElement = document.createElement('style');
-    styleElement.id = 'advanced-loading-animations';
-    styleElement.innerHTML = animationStyles;
-    document.head.appendChild(styleElement);
-    
-    return () => {
-      // Clean up the styles when component unmounts
-      const element = document.getElementById('advanced-loading-animations');
-      if (element) {
-        document.head.removeChild(element);
-      }
-    };
-  }
-}, []);
+    </Html>
+  );
+};
 
 // Enhanced lighting setup
 function EnhancedPBRLighting() {

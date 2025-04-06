@@ -7,9 +7,11 @@
     "@react-three/drei": "^9.80.0",
     "@react-three/fiber": "^8.13.6",
     "draco3d": "^1.5.7",
+    "katex": "^0.16.21",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-katex": "^3.0.1",
     "react-scripts": "5.0.1",
     "three": "^0.175.0",
     "three-mesh-bvh": "^0.8.0"
