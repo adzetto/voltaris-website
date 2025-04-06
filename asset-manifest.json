@@ -1,11 +1,35 @@
 {
   "files": {
-    "main.css": "/voltaris-website/static/css/main.aa2c8dbf.css",
-    "main.js": "/voltaris-website/static/js/main.6cbf8c0b.js",
+    "main.65125f3d.css": "/voltaris-website/static/css/main.65125f3d.d8da7b3d.css",
+    "main.65125f3d.js": "/voltaris-website/static/js/main.65125f3d.820c700c.js",
+    "vendor.threejs.19c8c233.js": "/voltaris-website/static/js/vendor.threejs.19c8c233.0c882735.js",
+    "vendor.three-stdlib.js": "/voltaris-website/static/js/vendor.three-stdlib.74006f8d.js",
+    "vendor.react-dom.js": "/voltaris-website/static/js/vendor.react-dom.1392c4e5.js",
+    "vendor.react-reconciler.js": "/voltaris-website/static/js/vendor.react-reconciler.27321772.js",
+    "vendor.monogrid.js": "/voltaris-website/static/js/vendor.monogrid.47e5d2dd.js",
+    "static/js/863.8565aeeb.js": "/voltaris-website/static/js/863.8565aeeb.js",
+    "main.a6eb99f0.js": "/voltaris-website/static/js/main.a6eb99f0.6c740483.js",
+    "main.eec7c0f2.js": "/voltaris-website/static/js/main.eec7c0f2.9c4bba6b.js",
+    "vendor.threejs.169dba7f.js": "/voltaris-website/static/js/vendor.threejs.169dba7f.d153f36c.js",
+    "vendor.threejs.68c5480d.js": "/voltaris-website/static/js/vendor.threejs.68c5480d.2763ecf1.js",
+    "vendor.threejs.8e12fa16.js": "/voltaris-website/static/js/vendor.threejs.8e12fa16.f6bfb999.js",
+    "vendor.threejs.82ed6b64.js": "/voltaris-website/static/js/vendor.threejs.82ed6b64.f895a2cf.js",
     "index.html": "/voltaris-website/index.html"
   },
   "entrypoints": [
-    "static/css/main.aa2c8dbf.css",
-    "static/js/main.6cbf8c0b.js"
+    "static/js/vendor.threejs.169dba7f.d153f36c.js",
+    "static/js/vendor.threejs.68c5480d.2763ecf1.js",
+    "static/js/vendor.threejs.8e12fa16.f6bfb999.js",
+    "static/js/vendor.threejs.82ed6b64.f895a2cf.js",
+    "static/js/vendor.threejs.19c8c233.0c882735.js",
+    "static/js/vendor.three-stdlib.74006f8d.js",
+    "static/js/vendor.react-dom.1392c4e5.js",
+    "static/js/vendor.react-reconciler.27321772.js",
+    "static/js/vendor.monogrid.47e5d2dd.js",
+    "static/js/863.8565aeeb.js",
+    "static/js/main.a6eb99f0.6c740483.js",
+    "static/js/main.eec7c0f2.9c4bba6b.js",
+    "static/css/main.65125f3d.d8da7b3d.css",
+    "static/js/main.65125f3d.820c700c.js"
   ]
 }
